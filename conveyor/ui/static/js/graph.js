@@ -181,10 +181,10 @@ export class GraphView {
       if (edge.from === name) this.#nodes.get(edge.to).root.classList.add("near");
       if (edge.to === name) this.#nodes.get(edge.from).root.classList.add("near");
     }
-    this.#fillCallouts(name);
     const { x, y } = node.box;
     this.callouts.style.left = `${x}px`;
     this.callouts.style.top = `${y}px`;
+    this.#fillCallouts(name);
     this.#keepInside();
     void this.callouts.offsetWidth; // reflow, so the labels transition in from hidden
     this.callouts.classList.add("on");
@@ -195,7 +195,7 @@ export class GraphView {
     const html = callouts(step, this.#run.params)
       .map(
         ([edge, x, side, index, label, value], i) => `
-        <div class="anno-item at-${edge} to-${side}" style="left:${x}px;--i:${i}">
+        <div class="anno-item at-${edge} to-${side}" data-side="${side}" style="left:${x}px;--i:${i}">
           <i class="anno-line"></i><i class="anno-dot"></i>
           <span class="anno-label"><em>${index}</em><b>${label}</b><span>${value}</span></span>
         </div>`,
@@ -217,6 +217,8 @@ export class GraphView {
     const label = (item) => item.lastElementChild.getBoundingClientRect();
     for (const item of items) {
       item.style.removeProperty("--rise");
+      item.classList.remove("to-west", "to-east");
+      item.classList.add(`to-${item.dataset.side}`);
       const box = label(item);
       if (box.left < room.left + 12) item.classList.replace("to-west", "to-east");
       else if (box.right > room.right - 12) item.classList.replace("to-east", "to-west");
