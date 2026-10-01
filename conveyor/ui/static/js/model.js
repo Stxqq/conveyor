@@ -12,9 +12,10 @@ const HEADLINE = [
 // Which json output is which is read off its shape, not the step's name:
 // a registration says {model, version, champion}, a gate {promote, reason},
 // a drift report {features: {name: {psi}}, thresholds}.
-const isRegistration = (v) => v && "model" in v && "version" in v && "champion" in v;
-const isGate = (v) => v && "promote" in v && "reason" in v;
-const isDrift = (v) => v && v.features && v.thresholds && "drift" in v.thresholds;
+const isObject = (v) => v !== null && typeof v === "object";
+const isRegistration = (v) => isObject(v) && "model" in v && "version" in v && "champion" in v;
+const isGate = (v) => isObject(v) && "promote" in v && "reason" in v;
+const isDrift = (v) => isObject(v) && isObject(v.features) && v.thresholds && "drift" in v.thresholds;
 
 export class ModelView {
   #values = new Map();
@@ -88,8 +89,8 @@ function modelCard(card, champion, gate, drift, note) {
     ? '<span class="chip chip-dark">champion</span>'
     : `<span class="chip chip-gray">challenger · champion is v${champion?.version}</span>`;
   const metrics = card.metrics;
-  const headline = HEADLINE.map(({ key, label, better }) => {
-    let delta = '<span class="delta">first champion</span>';
+  const headline = HEADLINE.map(({ key, label, better }, i) => {
+    let delta = `<span class="delta">${i ? "&nbsp;" : "first champion"}</span>`;
     if (!isChampion && champion) delta = deltaTag(metrics[key] - champion.metrics[key], better);
     else if (isChampion && gate?.champion_auc != null && key === "roc_auc") {
       delta = deltaTag(gate.gain, better, `vs v${gate.champion}`);

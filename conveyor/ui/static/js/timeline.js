@@ -7,6 +7,7 @@ export class TimelineView {
   #rows = new Map();
   #signature = "";
   #plotWidth = 0;
+  #last = null;
 
   constructor(root) {
     this.tile = el("div", "tile timeline-tile");
@@ -28,12 +29,15 @@ export class TimelineView {
     this.card.append(this.plot, this.body, this.legend);
     this.tile.append(this.card);
     root.append(this.tile);
+    // built while hidden, the plot has no width until the view is shown
     new ResizeObserver(() => {
       this.#plotWidth = this.axis.clientWidth;
+      if (this.#last) this.update(...this.#last);
     }).observe(this.axis);
   }
 
   update(run, player) {
+    this.#last = [run, player];
     if (!run.graph.length || !player.events.length) return;
     const signature = run.graph.map((s) => s.name).join("|");
     if (signature !== this.#signature) this.#build(run.graph, signature);

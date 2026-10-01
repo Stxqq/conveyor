@@ -36,7 +36,7 @@ export class Player {
     this.at = [];
     events.forEach((event, i) => this.at.push(this.#timeOf(event, i)));
     this.t = live ? this.length : 0;
-    this.index = live ? events.length : 0;
+    this.#sync();
     this.onChange(this);
   }
 
@@ -50,9 +50,10 @@ export class Player {
   }
 
   #timeOf(event, i) {
-    if (i === 0) return LEAD_IN;
+    if (i === 0) return 0;
     const gap = (event.ts - this.events[i - 1].ts) * 1000 * STRETCH;
-    return this.at[i - 1] + Math.max(gap, BEAT[event.type] ?? 0);
+    // the graph sits there pending for a moment before the first step starts
+    return this.at[i - 1] + Math.max(gap, BEAT[event.type] ?? 0) + (i === 1 ? LEAD_IN : 0);
   }
 
   get length() {
@@ -73,8 +74,8 @@ export class Player {
     if (!events.length) return 0;
     const t0 = events[0].ts;
     if (this.live) return Math.max(0, Date.now() / 1000 - t0);
-    if (t <= at[0]) return 0;
     const i = this.index - 1;
+    if (i < 0) return 0;
     if (i >= events.length - 1) return events.at(-1).ts - t0;
     const span = at[i + 1] - at[i];
     const k = span > 0 ? (t - at[i]) / span : 0;
@@ -91,8 +92,8 @@ export class Player {
   }
 
   pause() {
-    cancelAnimationFrame(this.#frame);
     if (!this.playing) return;
+    cancelAnimationFrame(this.#frame);
     this.playing = false;
     this.onChange(this);
   }

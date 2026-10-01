@@ -19,7 +19,7 @@ const SPEEDS = [
 const LEDE = {
   recorded:
     "A small pipeline engine for ML in plain Python. These are five recorded runs of its churn example, replayed in your browser at a fifteenth of their speed.",
-  live: "Runs in this workspace. Start one with conveyor run and it shows up here while it happens.",
+  live: "Runs in this workspace. Start one with <code>conveyor run</code> and it shows up here while it happens.",
 };
 
 const source = openSource();
@@ -42,7 +42,7 @@ const views = {
 const player = new Player(render);
 const transport = bindTransport();
 
-$("#lede").textContent = LEDE[source.live ? "live" : "recorded"];
+$("#lede").innerHTML = LEDE[source.live ? "live" : "recorded"];
 document.body.classList.add(source.live ? "is-live-source" : "is-recorded-source");
 
 function render() {

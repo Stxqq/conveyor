@@ -72,7 +72,7 @@ export class GraphView {
       const from = run.steps.get(edge.from)?.status;
       edge.root.classList.toggle("is-carried", DONE.has(from));
     }
-    if (this.#focus) this.#fillCallouts(this.#focus);
+    if (run.steps.has(this.#focus)) this.#fillCallouts(this.#focus);
     this.#follow();
   }
 
@@ -155,6 +155,7 @@ export class GraphView {
   }
 
   #setFocus(name) {
+    if (name && !this.#run?.steps.has(name)) return;
     this.#focus = name;
     this.canvas.classList.toggle("focusing", !!name);
     for (const node of this.#nodes.values()) node.root.classList.remove("near", "focus");
