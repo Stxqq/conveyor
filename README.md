@@ -13,18 +13,14 @@ A small pipeline engine for ML in plain Python: steps wired by parameter name, a
 </p>
 
 <p align="center">
-  <a href="https://stxqq.github.io/conveyor/">
-    <picture>
+  <a href="https://stxqq.github.io/conveyor/"><picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/launch-dark.png">
-      <img src=".github/assets/launch-light.png" alt="Open the live demo" width="300">
-    </picture>
-  </a>
-  <a href="https://github.com/Stxqq/conveyor">
-    <picture>
+      <img src=".github/assets/launch-light.png" alt="Open the live demo" width="280">
+    </picture></a>
+  <a href="https://github.com/Stxqq/conveyor"><picture>
       <source media="(prefers-color-scheme: dark)" srcset=".github/assets/star-dark.png">
-      <img src=".github/assets/star-light.png" alt="Star on GitHub" width="260">
-    </picture>
-  </a>
+      <img src=".github/assets/star-light.png" alt="Star on GitHub" width="280">
+    </picture></a>
   <br />
   <sub>If you found it useful, a star helps more people find it.</sub>
 </p>
