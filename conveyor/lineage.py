@@ -178,7 +178,8 @@ class Lineage:
 
     def metrics_of(self, step_run_id: int) -> dict[str, float | None]:
         rows = self._rows(
-            "SELECT name, value FROM metrics WHERE step_run_id = ?", (step_run_id,)
+            "SELECT name, value FROM metrics WHERE step_run_id = ? ORDER BY rowid",
+            (step_run_id,),
         )
         return {r["name"]: r["value"] for r in rows}
 

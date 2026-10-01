@@ -33,8 +33,12 @@ class EventLog:
             event.update(json_safe(fields))
             self._fh.write(json.dumps(event, default=str) + "\n")
             self._fh.flush()
-            for listener in self._listeners:
-                listener(event)
+            for listener in list(self._listeners):
+                try:
+                    listener(event)
+                except Exception:
+                    # A broken progress printer must not take the run down with it.
+                    self._listeners.remove(listener)
         return event
 
     def close(self) -> None:

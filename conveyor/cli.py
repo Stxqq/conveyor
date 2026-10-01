@@ -42,7 +42,15 @@ class Out:
         return self.paint(status.ljust(width), STATUS_COLOR.get(status, "0"))
 
     def line(self, text: str = "") -> None:
-        print(text, file=self.stream, flush=True)
+        if self.stream is None:
+            return
+        try:
+            print(text, file=self.stream, flush=True)
+        except BrokenPipeError:
+            # Piped into `head`: keep running, stop printing, and point stdout
+            # at /dev/null so the interpreter doesn't complain on exit.
+            os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+            self.stream = None
 
 
 def human_size(n: int | None) -> str:
@@ -74,11 +82,26 @@ def ago(ts: float) -> str:
     return "just now"
 
 
+def format_number(value: Any) -> str:
+    if value is None:
+        return "n/a"
+    if isinstance(value, (int, float)):
+        if float(value).is_integer() and abs(value) < 1e12:
+            return str(int(value))
+        return f"{value:.4g}"
+    return str(value)
+
+
 def format_metrics(metrics: dict[str, Any]) -> str:
-    return "  ".join(
-        f"{k} {v:.4g}" if isinstance(v, float) else f"{k} {v}"
-        for k, v in metrics.items()
-    )
+    return "   ".join(f"{k} {format_number(v)}" for k, v in metrics.items())
+
+
+def metric_lines(metrics: dict[str, Any], per_line: int = 4) -> list[str]:
+    items = list(metrics.items())
+    return [
+        format_metrics(dict(items[i : i + per_line]))
+        for i in range(0, len(items), per_line)
+    ]
 
 
 def coerce_param(raw: str, current: Any) -> Any:
@@ -113,14 +136,18 @@ def parse_params(pairs: list[str], pipeline: Pipeline) -> dict[str, Any]:
 
 
 class Progress:
-    """Prints one line per finished step while a run is going."""
+    """Prints one line per finished step while a run is going, followed by
+    the metrics and log lines the step produced."""
 
     def __init__(self, out: Out) -> None:
         self.out = out
         self.width = 12
+        self.notes: dict[str, list[str]] = {}
+        self.metrics: dict[str, dict[str, Any]] = {}
 
     def __call__(self, event: dict[str, Any]) -> None:
         kind, out = event["type"], self.out
+        step = event.get("step", "")
         if kind == "run_started":
             self.width = max(len(s["name"]) for s in event["graph"]) + 2
             cache = "cache on" if event["cache"] else "cache off"
@@ -130,37 +157,41 @@ class Progress:
                 + out.dim(cache)
             )
             out.line()
+        elif kind == "metric":
+            self.metrics.setdefault(step, {})[event["name"]] = event["value"]
+        elif kind == "log":
+            self.notes.setdefault(step, []).append(event["message"])
         elif kind in ("step_succeeded", "step_cached"):
             status = "succeeded" if kind == "step_succeeded" else "cached"
             took = human_duration(event.get("duration")) if status != "cached" else ""
-            out.line(
-                f"  {out.status(status)} {event['step'].ljust(self.width)}"
-                f"{took.rjust(9)}   {out.dim(event['kind'].ljust(6))}"
-                f" {out.dim(human_size(event['size']).rjust(8))}"
+            self.row(
+                status,
+                step,
+                took.rjust(9)
+                + "   "
+                + out.dim(f"{event['kind']:6} {human_size(event['size']):>8}"),
             )
-        elif kind == "metric":
-            value = event["value"]
-            shown = f"{value:.4g}" if isinstance(value, float) else str(value)
-            out.line(out.dim(f"  {'':10} {'':{self.width}}{event['name']} = {shown}"))
+            metrics = self.metrics.pop(step, None) or event.get("metrics") or {}
+            self.details(metrics, self.notes.pop(step, []))
         elif kind == "step_retry":
-            out.line(
-                f"  {out.status('retry')} {event['step'].ljust(self.width)}"
-                + out.dim(
+            self.row(
+                "retry",
+                step,
+                out.dim(
                     f"attempt {event['attempt']} failed ({event['error']}),"
                     f" again in {event['delay']:.2f}s"
-                )
+                ),
             )
         elif kind == "step_failed":
-            out.line(
-                f"  {out.status('failed')} {event['step'].ljust(self.width)}"
-                f"{human_duration(event['duration']).rjust(9)}   "
-                + out.paint(event["error"].splitlines()[0], "31")
+            self.row(
+                "failed",
+                step,
+                human_duration(event["duration"]).rjust(9)
+                + "   "
+                + out.paint(event["error"].splitlines()[0], "31"),
             )
         elif kind == "step_skipped":
-            out.line(
-                f"  {out.status('skipped')} {event['step'].ljust(self.width)}"
-                + out.dim(f"upstream {event['because']} failed")
-            )
+            self.row("skipped", step, out.dim(f"upstream {event['because']} failed"))
         elif kind == "run_finished":
             counts = event["counts"]
             out.line()
@@ -172,6 +203,16 @@ class Progress:
                     f"{counts['failed']} failed, {counts['skipped']} skipped"
                 )
             )
+
+    def row(self, status: str, step: str, rest: str) -> None:
+        self.out.line(f"  {self.out.status(status)} {step.ljust(self.width)}{rest}")
+
+    def details(self, metrics: dict[str, Any], notes: list[str]) -> None:
+        indent = " " * (13 + self.width)
+        for chunk in metric_lines(metrics):
+            self.out.line(indent + self.out.dim(chunk))
+        for note in notes:
+            self.out.line(indent + self.out.dim(note))
 
 
 def cmd_run(args: argparse.Namespace, out: Out) -> int:
@@ -222,7 +263,7 @@ def cmd_runs(args: argparse.Namespace, out: Out) -> int:
             steps += f"  {r['failed']} failed  {r['skipped'] or 0} skipped"
         out.line(
             f"{r['id']}  {r['pipeline'].ljust(10)} {out.status(r['status'])} "
-            f"{human_duration(r.get('duration')).rjust(9)}  {steps.ljust(34)}"
+            f"{human_duration(r.get('duration')).rjust(9)}  {steps.ljust(40)}"
             + out.dim(ago(r["started_at"]))
         )
     return 0
@@ -268,8 +309,8 @@ def cmd_show(args: argparse.Namespace, out: Out) -> int:
             )
             + (out.dim(f"  x{s['attempts']}") if s["attempts"] > 1 else "")
         )
-        if s["metrics"]:
-            out.line(out.dim(f"  {'':10} {'':{width}}{format_metrics(s['metrics'])}"))
+        for chunk in metric_lines(s["metrics"]):
+            out.line(out.dim(f"  {'':10} {'':{width}}{chunk}"))
         if s["error"] and s["status"] == "failed":
             for line in s["error"].splitlines():
                 out.line(f"  {'':10} {'':{width}}" + out.paint(line, "31"))
