@@ -12,6 +12,15 @@ A small pipeline engine for ML in plain Python: steps wired by parameter name, a
   <img alt="Only numpy" src="https://img.shields.io/badge/dependencies-numpy%20only-f59e0b?style=flat&labelColor=111113">
 </p>
 
+<p align="center">
+  <a href="https://stxqq.github.io/conveyor/">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset=".github/assets/launch-dark.png">
+      <img src=".github/assets/launch-light.png" alt="Open the live demo" width="300">
+    </picture>
+  </a>
+</p>
+
 ## Why
 
 Most ML pipelines I've worked on had the same needs: rerun only what changed,
