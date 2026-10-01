@@ -102,6 +102,13 @@ def test_ui_api(api):
     assert lineage["producer"]["step"] == "train"
     assert {u["step"] for u in lineage["upstream"]} >= {"features", "encoder", "split"}
 
+    gate = next(s for s in run["steps"] if s["step"] == "gate")
+    decision = json.load(api(f"/api/artifacts/{gate['output']}/value"))
+    assert decision["promote"] is True and decision["reason"] == "no champion yet"
+    with pytest.raises(urllib.error.HTTPError) as refused:
+        api(f"/api/artifacts/{model['output']}/value")
+    assert refused.value.code == 415
+
     models = json.load(api("/api/models"))
     assert models[0]["name"] == "churn" and models[0]["champion"] == 1
 

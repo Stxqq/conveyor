@@ -11,8 +11,12 @@ from ..events import follow, read_events
 from ..httpjson import JSONHandler
 from ..lineage import Lineage
 from ..registry import ModelRegistry
+from ..store import ArtifactStore
 
 STATIC = Path(__file__).parent / "static"
+# Model cards, gate decisions and drift reports are a few kB; anything bigger
+# is data, and the browser has no business parsing it.
+MAX_VALUE_BYTES = 256 * 1024
 
 
 def make_server(workspace: str | Path, host: str, port: int) -> ThreadingHTTPServer:
@@ -23,11 +27,13 @@ def make_server(workspace: str | Path, host: str, port: int) -> ThreadingHTTPSer
     GET /api/runs/<id>/events        the full event list
     GET /api/runs/<id>/stream        server-sent events, live until the run ends
     GET /api/artifacts/<id>          producer, upstream lineage and consumers
+    GET /api/artifacts/<id>/value    the stored value, for small json artifacts
     GET /api/models                  registry: versions, cards, champion
     """
     workspace = Path(workspace)
     lineage = Lineage(workspace / "conveyor.db")
     registry = ModelRegistry(workspace)
+    store = ArtifactStore(workspace)
     runs_dir = workspace / "runs"
 
     class Handler(JSONHandler):
@@ -59,6 +65,8 @@ def make_server(workspace: str | Path, host: str, port: int) -> ThreadingHTTPSer
                     self.stream(runs_dir / f"{run_id}.jsonl")
                 else:
                     raise LookupError("unknown endpoint")
+            elif len(parts) == 3 and parts[0] == "artifacts" and parts[2] == "value":
+                self.send_value(parts[1])
             elif len(parts) == 2 and parts[0] == "artifacts":
                 artifact = parts[1]
                 self.send_json(
@@ -82,6 +90,17 @@ def make_server(workspace: str | Path, host: str, port: int) -> ThreadingHTTPSer
                 )
             else:
                 raise LookupError("unknown endpoint")
+
+        def send_value(self, artifact_id: str) -> None:
+            found = lineage.artifact(artifact_id)
+            if found is None or not store.exists(artifact_id, found["kind"]):
+                raise LookupError(f"no artifact {artifact_id!r}")
+            if found["kind"] != "json" or found["size"] > MAX_VALUE_BYTES:
+                self.send_error_json(
+                    415, f"only json artifacts up to {MAX_VALUE_BYTES} bytes"
+                )
+                return
+            self.send_json(store.get(artifact_id, "json"))
 
         def stream(self, path: Path) -> None:
             self.send_response(200)

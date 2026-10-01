@@ -165,6 +165,10 @@ class Lineage:
         assert step_run_id is not None
         return step_run_id
 
+    def artifact(self, artifact_id: str) -> dict[str, Any] | None:
+        rows = self._rows("SELECT * FROM artifacts WHERE id = ?", (artifact_id,))
+        return rows[0] if rows else None
+
     def cached(self, cache_key: str) -> dict[str, Any] | None:
         """Most recent successful execution for this key (not a cache hit itself)."""
         rows = self._rows(
