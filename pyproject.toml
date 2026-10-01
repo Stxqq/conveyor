@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "conveyor"
+version = "0.1.0"
+description = "A small pipeline engine for ML: typed steps, a content-addressed cache, lineage and a live run view."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Stefan Carapic" }]
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+conveyor = "conveyor.cli:main"
+
+[project.urls]
+Homepage = "https://stxqq.github.io/conveyor/"
+Source = "https://github.com/Stxqq/conveyor"
+
+[tool.setuptools.packages.find]
+include = ["conveyor*"]
+
+[tool.setuptools.package-data]
+conveyor = ["ui/static/*", "ui/static/**/*"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["RUF001", "RUF002", "RUF003"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
