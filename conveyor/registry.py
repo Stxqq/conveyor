@@ -7,11 +7,18 @@ import re
 import sys
 import threading
 import time
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from .hashing import digest
+
+try:
+    import fcntl
+except ImportError:  # Windows: only threads in one process are kept apart
+    fcntl = None  # type: ignore[assignment]
 
 _lock = threading.Lock()
 
@@ -84,7 +91,7 @@ class ModelRegistry:
     ) -> ModelVersion:
         """Store a new version, or return the existing one for an identical model."""
         model_digest = digest(model)
-        with _lock:
+        with self._locked(name):
             index = self._index(name)
             for v in index["versions"]:
                 if v["digest"] == model_digest:
@@ -114,7 +121,7 @@ class ModelRegistry:
             return self._version(name, entry)
 
     def promote(self, name: str, version: int, reason: str = "") -> None:
-        with _lock:
+        with self._locked(name):
             index = self._index(name)
             if not any(v["version"] == version for v in index["versions"]):
                 raise LookupError(f"no model {name}:{version}")
@@ -123,6 +130,17 @@ class ModelRegistry:
                 {"version": version, "at": time.time(), "reason": reason}
             )
             self._save(name, index)
+
+    @contextmanager
+    def _locked(self, name: str) -> Iterator[None]:
+        # Two `conveyor run`s on one workspace would otherwise both read the
+        # index, pick the same version number and overwrite each other.
+        path = self.root / name / ".lock"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with _lock, path.open("a") as fh:
+            if fcntl is not None:
+                fcntl.flock(fh, fcntl.LOCK_EX)
+            yield
 
     def _index(self, name: str) -> dict[str, Any]:
         path = self.root / name / "index.json"
