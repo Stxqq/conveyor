@@ -1,9 +1,9 @@
 [
  {
   "seq": 1,
-  "ts": 1790860045.6865,
+  "ts": 1790860756.8266,
   "type": "run_started",
-  "run_id": "20261001-150725-2810",
+  "run_id": "20261001-151916-4c9b",
   "pipeline": "churn",
   "params": {
    "seed": 7,
@@ -160,26 +160,26 @@
  },
  {
   "seq": 2,
-  "ts": 1790860045.6867,
+  "ts": 1790860756.8267,
   "type": "step_cached",
   "step": "customers",
   "cache_key": "842e40824d3a2dd1a4ab349371955133da730812fb772afd035d90e8cc4d4d44",
   "artifact": "e5a3123cd73617e096d247f5e3404c1565ac482bfcd40f2146ef126d6edf20eb",
   "kind": "table",
   "size": 402536,
-  "source_run": "20261001-150725-e1f1",
+  "source_run": "20261001-151916-1b25",
   "metrics": {}
  },
  {
   "seq": 3,
-  "ts": 1790860045.6869,
+  "ts": 1790860756.8269,
   "type": "step_cached",
   "step": "validate",
   "cache_key": "4268b6ca29172273632df26ee392e9d5a9ed69663201d114c67cbf86467fa218",
   "artifact": "435b74224e2cc779679d4dfa4724e3e2325780ab4d174931a48e77d6fd7e5998",
   "kind": "table",
   "size": 401283,
-  "source_run": "20261001-150725-e1f1",
+  "source_run": "20261001-151916-1b25",
   "metrics": {
    "rows": 24000.0,
    "duplicates_dropped": 76.0
@@ -187,14 +187,14 @@
  },
  {
   "seq": 4,
-  "ts": 1790860045.687,
+  "ts": 1790860756.827,
   "type": "step_cached",
   "step": "split",
   "cache_key": "4a438579271b4ea22c2ad0e754e85b4b533b9a593cec63b305f868b754b1013f",
   "artifact": "a9bd18a0097534c27b770e73cea227d84aa4a24715a7c6696db621c53c17de50",
   "kind": "table",
   "size": 404929,
-  "source_run": "20261001-150725-e1f1",
+  "source_run": "20261001-151916-1b25",
   "metrics": {
    "train_rows": 19942.0,
    "test_rows": 4058.0,
@@ -204,62 +204,62 @@
  },
  {
   "seq": 5,
-  "ts": 1790860045.6872,
+  "ts": 1790860756.8272,
   "type": "step_cached",
   "step": "encoder",
   "cache_key": "1fbfdb6af31ed254616b7469950e67225bee291ddeb8217819ecc194efa9cb4f",
   "artifact": "f0ac4ed2f16267a406fb338e46a091187e019e9867053296bd2c55a2af7de8ba",
   "kind": "pickle",
   "size": 905,
-  "source_run": "20261001-150725-e1f1",
+  "source_run": "20261001-151916-1b25",
   "metrics": {}
  },
  {
   "seq": 6,
-  "ts": 1790860045.6873,
+  "ts": 1790860756.8273,
   "type": "step_cached",
   "step": "features",
   "cache_key": "d561c6e1b9bf698924324f13ec770ae4493b795c0411d2676b86d8a18ccdbd61",
   "artifact": "b994f665e31b5e868766c244adc68c53ec8c38737eab36ac14216a9f6ac6fd81",
   "kind": "table",
   "size": 715865,
-  "source_run": "20261001-150725-e1f1",
+  "source_run": "20261001-151916-1b25",
   "metrics": {}
  },
  {
   "seq": 7,
-  "ts": 1790860045.6874,
+  "ts": 1790860756.8274,
   "type": "step_cached",
   "step": "baseline",
   "cache_key": "566b2ca434b6fc9be308008fade3f610b5fd59c13082823f4f7628c81ebd1255",
   "artifact": "28cf44acd1fa47a1bea0800bd7e08d4cf6407ee863a41fde4fa739139a2c7baf",
   "kind": "json",
   "size": 3362,
-  "source_run": "20261001-150725-e1f1",
+  "source_run": "20261001-151916-1b25",
   "metrics": {}
  },
  {
   "seq": 8,
-  "ts": 1790860045.6875,
+  "ts": 1790860756.8276,
   "type": "step_cached",
   "step": "new_month",
   "cache_key": "5202021161c2aa63345ef4bb9dddcddeeb1ad229b7d1c46b0842427d4ab2f34c",
   "artifact": "92143de9cd160687a9786094d0952df1468ebffcdd8cd1ddd2dccce4f6cf9e45",
   "kind": "table",
   "size": 35761,
-  "source_run": "20261001-150725-e1f1",
+  "source_run": "20261001-151916-1b25",
   "metrics": {}
  },
  {
   "seq": 9,
-  "ts": 1790860045.6926,
+  "ts": 1790860756.8305,
   "type": "step_started",
   "step": "train",
   "attempt": 1
  },
  {
   "seq": 10,
-  "ts": 1790860045.6963,
+  "ts": 1790860756.8339,
   "type": "metric",
   "step": "train",
   "name": "newton_iterations",
@@ -267,7 +267,7 @@
  },
  {
   "seq": 11,
-  "ts": 1790860045.6964,
+  "ts": 1790860756.8339,
   "type": "metric",
   "step": "train",
   "name": "train_loss",
@@ -275,11 +275,11 @@
  },
  {
   "seq": 12,
-  "ts": 1790860045.6971,
+  "ts": 1790860756.8344,
   "type": "step_succeeded",
   "step": "train",
   "attempts": 1,
-  "duration": 0.0043,
+  "duration": 0.0066,
   "cache_key": "f7750df72543992fffcf7d27df2c0d5a2409d95b49b2257f539f25398aecc559",
   "artifact": "9a041b71aa90da3e8923ba62822ac49e1335dddf23d98f34c706039b98b695ea",
   "kind": "pickle",
@@ -287,14 +287,14 @@
  },
  {
   "seq": 13,
-  "ts": 1790860045.7019,
+  "ts": 1790860756.8375,
   "type": "step_started",
   "step": "evaluate",
   "attempt": 1
  },
  {
   "seq": 14,
-  "ts": 1790860045.7034,
+  "ts": 1790860756.839,
   "type": "metric",
   "step": "evaluate",
   "name": "roc_auc",
@@ -302,7 +302,7 @@
  },
  {
   "seq": 15,
-  "ts": 1790860045.7034,
+  "ts": 1790860756.839,
   "type": "metric",
   "step": "evaluate",
   "name": "pr_auc",
@@ -310,7 +310,7 @@
  },
  {
   "seq": 16,
-  "ts": 1790860045.7034,
+  "ts": 1790860756.839,
   "type": "metric",
   "step": "evaluate",
   "name": "log_loss",
@@ -318,7 +318,7 @@
  },
  {
   "seq": 17,
-  "ts": 1790860045.7034,
+  "ts": 1790860756.839,
   "type": "metric",
   "step": "evaluate",
   "name": "brier",
@@ -326,7 +326,7 @@
  },
  {
   "seq": 18,
-  "ts": 1790860045.7034,
+  "ts": 1790860756.8391,
   "type": "metric",
   "step": "evaluate",
   "name": "ece",
@@ -334,7 +334,7 @@
  },
  {
   "seq": 19,
-  "ts": 1790860045.7034,
+  "ts": 1790860756.8391,
   "type": "metric",
   "step": "evaluate",
   "name": "lift_top_decile",
@@ -342,7 +342,7 @@
  },
  {
   "seq": 20,
-  "ts": 1790860045.7035,
+  "ts": 1790860756.8391,
   "type": "metric",
   "step": "evaluate",
   "name": "base_rate",
@@ -350,11 +350,11 @@
  },
  {
   "seq": 21,
-  "ts": 1790860045.7043,
+  "ts": 1790860756.8396,
   "type": "step_succeeded",
   "step": "evaluate",
   "attempts": 1,
-  "duration": 0.0021,
+  "duration": 0.005,
   "cache_key": "bcbb2d1fd4caec8553fd992ea83842cb2657deaadc824893b1ee6db71805ab04",
   "artifact": "5d71e989a42a1728730f53d61c1b397626596e4a1b0ccaeac93e2101855da4d6",
   "kind": "json",
@@ -362,14 +362,14 @@
  },
  {
   "seq": 22,
-  "ts": 1790860045.7044,
+  "ts": 1790860756.8397,
   "type": "step_started",
   "step": "gate",
   "attempt": 1
  },
  {
   "seq": 23,
-  "ts": 1790860045.7068,
+  "ts": 1790860756.8408,
   "type": "metric",
   "step": "gate",
   "name": "auc_gain",
@@ -377,18 +377,18 @@
  },
  {
   "seq": 24,
-  "ts": 1790860045.7069,
+  "ts": 1790860756.8408,
   "type": "log",
   "step": "gate",
   "message": "AUC -0.0117 vs v1, below the 0.002 bar"
  },
  {
   "seq": 25,
-  "ts": 1790860045.7083,
+  "ts": 1790860756.8412,
   "type": "step_succeeded",
   "step": "gate",
   "attempts": 1,
-  "duration": 0.0034,
+  "duration": 0.0013,
   "cache_key": "52cf416d186833b8f319a9706a42f2a8773ed7626b641a4d4ebcda956ae6d963",
   "artifact": "77671d4428326967b037b59f38a12073f1ea309b650e8da3c562037784a9afe4",
   "kind": "json",
@@ -396,25 +396,25 @@
  },
  {
   "seq": 26,
-  "ts": 1790860045.7085,
+  "ts": 1790860756.8413,
   "type": "step_started",
   "step": "register",
   "attempt": 1
  },
  {
   "seq": 27,
-  "ts": 1790860045.7102,
+  "ts": 1790860756.8423,
   "type": "log",
   "step": "register",
   "message": "registered churn:2, champion is v1"
  },
  {
   "seq": 28,
-  "ts": 1790860045.7109,
+  "ts": 1790860756.8427,
   "type": "step_succeeded",
   "step": "register",
   "attempts": 1,
-  "duration": 0.002,
+  "duration": 0.0012,
   "cache_key": "decb35f2aa5f1e2d45f464545288cecdcdfdb48df97d648ed87467a47aed8953",
   "artifact": "2fbf5e1b9fdfab266242b2dc10ebead12f63ffc976a3038265b73222b11ee057",
   "kind": "json",
@@ -422,14 +422,14 @@
  },
  {
   "seq": 29,
-  "ts": 1790860045.7126,
+  "ts": 1790860756.8434,
   "type": "step_started",
   "step": "score",
   "attempt": 1
  },
  {
   "seq": 30,
-  "ts": 1790860045.7136,
+  "ts": 1790860756.8439,
   "type": "metric",
   "step": "score",
   "name": "scored",
@@ -437,7 +437,7 @@
  },
  {
   "seq": 31,
-  "ts": 1790860045.7137,
+  "ts": 1790860756.8439,
   "type": "metric",
   "step": "score",
   "name": "mean_score",
@@ -445,7 +445,7 @@
  },
  {
   "seq": 32,
-  "ts": 1790860045.7137,
+  "ts": 1790860756.8439,
   "type": "metric",
   "step": "score",
   "name": "high_risk_share",
@@ -453,11 +453,11 @@
  },
  {
   "seq": 33,
-  "ts": 1790860045.7144,
+  "ts": 1790860756.8441,
   "type": "step_succeeded",
   "step": "score",
   "attempts": 1,
-  "duration": 0.0013,
+  "duration": 0.0012,
   "cache_key": "ec7311af26a4b66d3ef7e358209f9c979e73384f2596301bbfa2743777e913ea",
   "artifact": "736d23c1795ce377ffc45da2f7f66b7bfd2a8037e6d6c5fb497182899d505fba",
   "kind": "table",
@@ -465,14 +465,14 @@
  },
  {
   "seq": 34,
-  "ts": 1790860045.7146,
+  "ts": 1790860756.8442,
   "type": "step_cached",
   "step": "monitor",
   "cache_key": "1175497edbb881df93eda39c28ad908c07e902aee6d61bac39dc239262ac20c0",
   "artifact": "943970b3f520411b26ee3564a10251c717075a22204d6c498515e245f68d0506",
   "kind": "json",
   "size": 911,
-  "source_run": "20261001-150725-e1f1",
+  "source_run": "20261001-151916-1b25",
   "metrics": {
    "psi_max": 0.44073,
    "features_drifting": 1.0
@@ -480,10 +480,10 @@
  },
  {
   "seq": 35,
-  "ts": 1790860045.7149,
+  "ts": 1790860756.8443,
   "type": "run_finished",
   "status": "succeeded",
-  "duration": 0.0283,
+  "duration": 0.0178,
   "counts": {
    "succeeded": 5,
    "cached": 8,

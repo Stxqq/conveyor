@@ -1,5 +1,7 @@
 """Run the churn pipeline a few times in a fresh workspace and save the event
-streams to docs/runs/, where the static demo replays them.
+streams to docs/runs/, where the static demo replays them. The json outputs
+those runs reference (model card inputs, gate decisions, drift reports) go to
+docs/runs/artifacts/, standing in for /api/artifacts/<id>/value.
 
     python scripts/record_demo.py
 """
@@ -33,7 +35,8 @@ SCENARIOS = [
 def main() -> None:
     pipeline = load_pipeline(ROOT / "examples" / "churn" / "pipeline.py")
     out = ROOT / "docs" / "runs"
-    out.mkdir(parents=True, exist_ok=True)
+    values = out / "artifacts"
+    values.mkdir(parents=True, exist_ok=True)
     index = []
     with tempfile.TemporaryDirectory() as tmp:
         ex = Executor(Path(tmp) / ".conveyor")
@@ -41,6 +44,11 @@ def main() -> None:
             result = ex.run(pipeline, params, source="examples/churn/pipeline.py")
             events = read_events(result.events_path)
             (out / f"{slug}.json").write_text(json.dumps(events, indent=1) + "\n")
+            for event in events:
+                if event.get("kind") == "json":
+                    value = ex.store.get(event["artifact"], "json")
+                    target = values / f"{event['artifact']}.json"
+                    target.write_text(json.dumps(value, indent=1) + "\n")
             index.append(
                 {
                     "file": f"{slug}.json",

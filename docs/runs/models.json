@@ -7,7 +7,7 @@
     "name": "churn",
     "version": 1,
     "digest": "7e9408883063938d994adb91c16e2fe21dc37e34e5ea7cbc84f9557fbd90fa66",
-    "created_at": 1790860045.673318,
+    "created_at": 1790860756.8166778,
     "class": "churn.model.ChurnModel",
     "description": "Probability that a customer cancels within 30 days.",
     "intended_use": "Ranking customers for retention offers; not for pricing.",
@@ -147,7 +147,7 @@
      "promote": true,
      "reason": "no champion yet"
     },
-    "run_id": "20261001-150725-e1f1",
+    "run_id": "20261001-151916-1b25",
     "caveats": [
      "Trained on synthetic data.",
      "Scores drift with pricing changes; watch the monitor step."
@@ -157,7 +157,7 @@
     "name": "churn",
     "version": 2,
     "digest": "9a041b71aa90da3e8923ba62822ac49e1335dddf23d98f34c706039b98b695ea",
-    "created_at": 1790860045.709425,
+    "created_at": 1790860756.8416939,
     "class": "churn.model.ChurnModel",
     "description": "Probability that a customer cancels within 30 days.",
     "intended_use": "Ranking customers for retention offers; not for pricing.",
@@ -286,7 +286,7 @@
      "promote": false,
      "reason": "AUC -0.0117 vs v1, below the 0.002 bar"
     },
-    "run_id": "20261001-150725-2810",
+    "run_id": "20261001-151916-4c9b",
     "caveats": [
      "Trained on synthetic data.",
      "Scores drift with pricing changes; watch the monitor step."

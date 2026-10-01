@@ -1,0 +1,88 @@
+{
+ "roc_auc": 0.7867150654443326,
+ "pr_auc": 0.4404850437570235,
+ "log_loss": 0.3877923695704307,
+ "brier": 0.12120451906712039,
+ "ece": 0.04881855593888615,
+ "lift_top_decile": 3.1272012624996313,
+ "base_rate": 0.1646131099063578,
+ "calibration": [
+  {
+   "low": 0.0,
+   "high": 0.1,
+   "count": 1563,
+   "predicted": 0.0688,
+   "observed": 0.0429
+  },
+  {
+   "low": 0.1,
+   "high": 0.2,
+   "count": 1766,
+   "predicted": 0.1418,
+   "observed": 0.1574
+  },
+  {
+   "low": 0.2,
+   "high": 0.3,
+   "count": 576,
+   "predicted": 0.2409,
+   "observed": 0.3958
+  },
+  {
+   "low": 0.3,
+   "high": 0.4,
+   "count": 126,
+   "predicted": 0.3373,
+   "observed": 0.5794
+  },
+  {
+   "low": 0.4,
+   "high": 0.5,
+   "count": 26,
+   "predicted": 0.4282,
+   "observed": 0.8077
+  },
+  {
+   "low": 0.5,
+   "high": 0.6,
+   "count": 1,
+   "predicted": 0.5196,
+   "observed": 1.0
+  }
+ ],
+ "drivers": [
+  {
+   "feature": "contract=monthly",
+   "weight": 0.3999
+  },
+  {
+   "feature": "tenure_months",
+   "weight": -0.3042
+  },
+  {
+   "feature": "monthly_charges",
+   "weight": 0.2979
+  },
+  {
+   "feature": "contract=two_year",
+   "weight": -0.2288
+  },
+  {
+   "feature": "sessions_30d",
+   "weight": -0.2129
+  },
+  {
+   "feature": "contract=annual",
+   "weight": -0.1711
+  }
+ ],
+ "test_rows": 4058,
+ "train_months": [
+  0,
+  9
+ ],
+ "test_months": [
+  10,
+  11
+ ]
+}

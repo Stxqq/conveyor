@@ -1,0 +1,9 @@
+{
+ "challenger_auc": 0.7867150654443326,
+ "min_gain": 0.002,
+ "champion": 1,
+ "champion_auc": 0.7984636920848568,
+ "gain": -0.011748626640524229,
+ "promote": false,
+ "reason": "AUC -0.0117 vs v1, below the 0.002 bar"
+}

@@ -1,0 +1,60 @@
+{
+ "features": {
+  "tenure_months": {
+   "psi": 0.0106,
+   "status": "stable"
+  },
+  "age": {
+   "psi": 0.00603,
+   "status": "stable"
+  },
+  "monthly_charges": {
+   "psi": 0.44073,
+   "status": "drift"
+  },
+  "total_charges": {
+   "psi": 0.03334,
+   "status": "stable"
+  },
+  "sessions_30d": {
+   "psi": 0.00227,
+   "status": "stable"
+  },
+  "support_tickets_90d": {
+   "psi": 9e-05,
+   "status": "stable"
+  },
+  "late_payments_12m": {
+   "psi": 0.00065,
+   "status": "stable"
+  },
+  "contract": {
+   "psi": 0.00482,
+   "status": "stable"
+  },
+  "plan": {
+   "psi": 0.0005,
+   "status": "stable"
+  },
+  "payment": {
+   "psi": 0.00084,
+   "status": "stable"
+  },
+  "region": {
+   "psi": 0.00208,
+   "status": "stable"
+  }
+ },
+ "flagged": [
+  "monthly_charges"
+ ],
+ "thresholds": {
+  "watch": 0.1,
+  "drift": 0.25
+ },
+ "scores": {
+  "count": 2007,
+  "mean": 0.14507000561936712,
+  "p90": 0.33374180369543355
+ }
+}
