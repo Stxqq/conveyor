@@ -112,7 +112,10 @@ def test_ui_api(api):
     models = json.load(api("/api/models"))
     assert models[0]["name"] == "churn" and models[0]["champion"] == 1
 
-    assert b"<title>conveyor</title>" in api("/").read()
+    page = api("/").read()
+    assert b"<title>conveyor</title>" in page
+    assert b'name="conveyor-source" content="live"' in page
+    assert b"export class" in api("/js/graph.js").read()
     with pytest.raises(urllib.error.HTTPError):
         api("/../pyproject.toml")
     with pytest.raises(urllib.error.HTTPError):

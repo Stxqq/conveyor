@@ -124,6 +124,12 @@ def make_server(workspace: str | Path, host: str, port: int) -> ThreadingHTTPSer
                 self.send_error_json(404, "not found")
                 return
             body = target.read_bytes()
+            if target.name == "index.html":
+                # the same page is published as a static demo of recorded runs
+                body = body.replace(
+                    b'name="conveyor-source" content="recorded"',
+                    b'name="conveyor-source" content="live"',
+                )
             kind = mimetypes.guess_type(target.name)[0] or "application/octet-stream"
             self.send_response(200)
             self.send_header("Content-Type", kind)
@@ -131,9 +137,15 @@ def make_server(workspace: str | Path, host: str, port: int) -> ThreadingHTTPSer
             self.end_headers()
             self.wfile.write(body)
 
-    server = ThreadingHTTPServer((host, port), Handler)
+    server = _Server((host, port), Handler)
     server.daemon_threads = True
     return server
+
+
+class _Server(ThreadingHTTPServer):
+    # A browser opens a burst of connections for the page's modules; with the
+    # default backlog of 5 some of them get reset on macOS.
+    request_queue_size = 64
 
 
 def serve_ui(workspace: str, host: str, port: int, out: Any) -> None:
