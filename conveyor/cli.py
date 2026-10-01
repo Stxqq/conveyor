@@ -28,9 +28,10 @@ STATUS_COLOR = {
 
 
 class Out:
-    def __init__(self, stream: Any = sys.stdout) -> None:
-        self.stream = stream
-        self.color = stream.isatty() and "NO_COLOR" not in os.environ
+    def __init__(self, stream: Any = None) -> None:
+        self.stream = stream or sys.stdout
+        self.color = self.stream.isatty() and "NO_COLOR" not in os.environ
+        self.closed = False
 
     def paint(self, text: str, code: str) -> str:
         return f"\033[{code}m{text}\033[0m" if self.color else text
@@ -42,7 +43,7 @@ class Out:
         return self.paint(status.ljust(width), STATUS_COLOR.get(status, "0"))
 
     def line(self, text: str = "") -> None:
-        if self.stream is None:
+        if self.closed:
             return
         try:
             print(text, file=self.stream, flush=True)
@@ -50,7 +51,7 @@ class Out:
             # Piped into `head`: keep running, stop printing, and point stdout
             # at /dev/null so the interpreter doesn't complain on exit.
             os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
-            self.stream = None
+            self.closed = True
 
 
 def human_size(n: int | None) -> str:
