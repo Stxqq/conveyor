@@ -1,19 +1,19 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "conveyor"
 version = "0.1.0"
-description = "A small pipeline engine for ML: typed steps, a content-addressed cache, lineage and a live run view."
+description = "A small pipeline engine for ML: steps wired by name, a content-addressed cache, lineage and a live run view."
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Stefan Carapic" }]
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
