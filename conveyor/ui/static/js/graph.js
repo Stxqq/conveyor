@@ -6,6 +6,8 @@ import { DONE, SETTLED } from "./run.js";
 
 const MIN_SCALE = 0.8;
 const PACKET_MS = 560;
+const TOUCH_FOCUS_MS = 1600;
+const touch = matchMedia("(hover: none)");
 
 const META = {
   pending: () => "–",
@@ -32,6 +34,7 @@ export class GraphView {
   #userUntil = 0;
   #gliding = false;
   #dragged = false;
+  #touchTimer = 0;
 
   constructor(root, { onOpen }) {
     this.onOpen = onOpen;
@@ -63,7 +66,7 @@ export class GraphView {
       this.#status.set(name, step.status);
       node.root.classList.replace(`is-${before ?? "pending"}`, `is-${step.status}`);
       node.root.setAttribute("aria-label", `${name}, ${step.status}`);
-      if (before && SETTLED.has(step.status)) this.#settle(node);
+      if (before && SETTLED.has(step.status)) this.#settle(node, name);
       if (before === "pending" && (step.status === "running" || step.status === "cached")) {
         for (const edge of this.#edges) if (edge.to === name) this.#send(edge);
       }
@@ -109,6 +112,9 @@ export class GraphView {
           <span class="node-name"><i class="node-dot"></i>${escape(name)}</span>
           <span class="node-meta"></span>
           <span class="kl-grid"></span><span class="kl-box"></span>
+          <span class="kl-dim kl-w"><b>${NODE.w}</b></span>
+          <span class="kl-dim kl-h"><b>${NODE.h}</b></span>
+          <span class="kl-dim kl-r">R14</span>
         </div>`;
       root.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && this.#setFocus(name));
       root.addEventListener("pointerleave", (e) => e.pointerType === "mouse" && this.#setFocus(null));
@@ -128,10 +134,17 @@ export class GraphView {
     this.#fit();
   }
 
-  #settle(node) {
+  #settle(node, name) {
+    // Phones have no hover, so the keylines would never show there; flash them
+    // on each step as it settles instead.
+    if (touch.matches && this.#focus !== name) {
+      this.#setFocus(name);
+      clearTimeout(this.#touchTimer);
+      this.#touchTimer = setTimeout(() => this.#focus === name && this.#setFocus(null), TOUCH_FOCUS_MS);
+    }
     if (still()) return;
     node.root.classList.remove("settle");
-    void node.root.offsetWidth;
+    void node.root.offsetWidth; // force a reflow so the animation restarts
     node.root.classList.add("settle");
   }
 
@@ -172,7 +185,8 @@ export class GraphView {
     const { x, y } = node.box;
     this.callouts.style.left = `${x}px`;
     this.callouts.style.top = `${y}px`;
-    void this.callouts.offsetWidth;
+    this.#keepInside();
+    void this.callouts.offsetWidth; // reflow, so the labels transition in from hidden
     this.callouts.classList.add("on");
   }
 
@@ -190,6 +204,32 @@ export class GraphView {
     if (this.callouts.dataset.html !== html) {
       this.callouts.dataset.html = html;
       this.callouts.innerHTML = html;
+      this.#keepInside();
+    }
+  }
+
+  // Labels of a node near the tile's edge would hang off it. Flip those to the
+  // node's other side; when that puts one on top of its neighbour on the same
+  // edge, lift it above the neighbour.
+  #keepInside() {
+    const room = this.tile.getBoundingClientRect();
+    const items = [...this.callouts.children];
+    const label = (item) => item.lastElementChild.getBoundingClientRect();
+    for (const item of items) {
+      item.style.removeProperty("--rise");
+      const box = label(item);
+      if (box.left < room.left + 12) item.classList.replace("to-west", "to-east");
+      else if (box.right > room.right - 12) item.classList.replace("to-east", "to-west");
+    }
+    for (const edge of ["top", "bottom"]) {
+      const [a, b] = items.filter((item) => item.classList.contains(`at-${edge}`));
+      const ra = label(a);
+      const rb = label(b);
+      if (ra.right <= rb.left || rb.right <= ra.left) continue;
+      // lift the one whose line stays clear of the other label
+      const lifted = a.classList.contains("to-east") ? a : b;
+      const other = lifted === a ? rb : ra;
+      lifted.style.setProperty("--rise", `${Math.ceil(other.height / this.#scale) + 6}px`);
     }
   }
 

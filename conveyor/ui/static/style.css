@@ -153,12 +153,18 @@ code { font-family: var(--mono); font-size: .86em; }
 }
 a.f-value:hover { color: var(--ink); }
 
-/* ————— graph ————— */
-.graph-tile { padding: 72px 28px; }
+/* graph */
+.graph-tile { padding: 56px 28px; overflow: clip; }
 .graph-tile.is-panning { overflow: hidden; padding-inline: 0; }
+/* fade the cropped ends so it's clear there's more graph to drag into view */
+.graph-tile.is-panning .graph-viewport {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+}
 .graph-tile.is-panning .graph-viewport { cursor: grab; touch-action: pan-y; }
 .graph-tile.is-panning .graph-viewport:active { cursor: grabbing; }
-.graph-viewport { position: relative; }
+/* the churn graph's height, held before the first run loads so nothing jumps */
+.graph-viewport { position: relative; height: 316px; }
 .graph-canvas {
   position: absolute; left: 0; top: 0;
   transform-origin: 0 0;
@@ -196,10 +202,13 @@ a.f-value:hover { color: var(--ink); }
   background: #fff;
   border-radius: 14px;
   box-shadow: var(--card-shadow);
-  transition: transform .5s var(--ease), opacity .45s var(--ease);
+  transition: transform .5s var(--ease), box-shadow .5s var(--ease), opacity .45s var(--ease);
 }
 .node:focus-visible .node-card { outline: 2px solid var(--ink); outline-offset: 2px; }
-.node.focus .node-card { transform: scale(.97); }
+.node.focus .node-card {
+  transform: translateY(-3px);
+  box-shadow: 0 2px 10px -2px rgba(0, 0, 0, .06), 0 30px 50px -26px rgba(0, 0, 0, .28);
+}
 .node-name {
   display: flex; align-items: center; gap: 6px;
   font-size: 12.5px; font-weight: 600; line-height: 1.3;
@@ -239,9 +248,9 @@ a.f-value:hover { color: var(--ink); }
 .is-failed .node-dot { background: var(--red); }
 
 /* keylines over the hovered node, after the portfolio's spec sheets */
-.kl-grid, .kl-box {
+.kl-grid, .kl-box, .kl-dim {
   position: absolute; pointer-events: none;
-  opacity: 0; transition: opacity .35s ease;
+  opacity: 0; transition: opacity .35s var(--ease);
 }
 .kl-grid {
   inset: 0; border-radius: 14px;
@@ -251,7 +260,21 @@ a.f-value:hover { color: var(--ink); }
   background-size: 8px 8px;
 }
 .kl-box { inset: -1px; border: 1px solid rgba(17, 17, 19, .22); border-radius: 15px; }
-.node.focus .kl-grid, .node.focus .kl-box { opacity: 1; }
+.kl-dim {
+  font: 8.5px/1 var(--mono); letter-spacing: .05em;
+  color: rgba(17, 17, 19, .5);
+}
+.kl-dim b { position: relative; font-weight: 400; background: var(--tile); }
+.kl-w { left: 0; right: 0; top: -12px; border-top: 1px solid #c4c4cc; text-align: center; }
+.kl-w b { top: -5px; padding: 0 4px; }
+.kl-h {
+  top: 0; bottom: 0; right: -12px;
+  display: flex; align-items: center;
+  border-right: 1px solid #c4c4cc;
+}
+.kl-h b { left: 6px; padding: 2px 0; }
+.kl-r { left: 3px; top: -10px; }
+.node.focus .kl-grid, .node.focus .kl-box, .node.focus .kl-dim { opacity: 1; }
 
 .callouts {
   position: absolute; z-index: 5;
@@ -268,11 +291,11 @@ a.f-value:hover { color: var(--ink); }
   border-radius: 999px;
   background: var(--ink);
   opacity: 0; transform: scale(.4);
-  transition: opacity .25s ease, transform .4s var(--ease);
+  transition: opacity .25s var(--ease), transform .4s var(--ease);
 }
 .anno-line {
   position: absolute; left: -.5px;
-  width: 1px; height: 18px;
+  width: 1px; height: calc(18px + var(--rise, 0px));
   background: #c4c4cc;
   transform: scaleY(0);
   transition: transform .45s var(--ease);
@@ -283,16 +306,17 @@ a.f-value:hover { color: var(--ink); }
   position: absolute;
   display: grid; grid-template-columns: auto 1fr; column-gap: 6px; row-gap: 1px;
   width: max-content; max-width: 150px; align-items: baseline;
-  padding: 3px 6px;
-  border-radius: 7px;
-  background: rgba(245, 245, 246, .92);
+  /* the tile's own colour: invisible, but it keeps edges from running through the text */
+  padding: 1px 3px;
+  border-radius: 4px;
+  background: var(--tile);
   opacity: 0;
-  transition: opacity .3s ease, transform .45s var(--ease);
+  transition: opacity .3s var(--ease), transform .45s var(--ease);
 }
-.at-top .anno-label { bottom: 22px; transform: translateY(4px); }
-.at-bottom .anno-label { top: 22px; transform: translateY(-4px); }
-.to-west .anno-label { right: -12px; text-align: right; grid-template-columns: 1fr auto; }
-.to-east .anno-label { left: -12px; }
+.at-top .anno-label { bottom: calc(22px + var(--rise, 0px)); transform: translateY(4px); }
+.at-bottom .anno-label { top: calc(22px + var(--rise, 0px)); transform: translateY(-4px); }
+.to-west .anno-label { right: -6px; text-align: right; grid-template-columns: 1fr auto; }
+.to-east .anno-label { left: -6px; }
 .to-west .anno-label em { grid-column: 2; grid-row: 1 / span 2; }
 .to-west .anno-label b, .to-west .anno-label span { grid-column: 1; }
 .anno-label em {
