@@ -28,7 +28,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      # the same files `conveyor ui` serves, plus the recorded runs it replays
       - name: Assemble the site
         run: make site
       - uses: actions/configure-pages@v5
