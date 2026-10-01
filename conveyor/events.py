@@ -55,15 +55,30 @@ def read_events(path: Path) -> list[dict[str, Any]]:
 
 
 def follow(
-    path: Path, poll: float = 0.1, idle_timeout: float = 600.0
-) -> Iterator[dict[str, Any]]:
-    """Yield events as they're appended, stopping after ``run_finished``."""
+    path: Path,
+    poll: float = 0.1,
+    idle_timeout: float = 600.0,
+    heartbeat: float = 15.0,
+    still_running: Callable[[], bool] = lambda: True,
+) -> Iterator[dict[str, Any] | None]:
+    """Yield events as they're appended, stopping after ``run_finished``.
+
+    While the file is quiet, yields ``None`` every ``heartbeat`` seconds so a
+    server can find out the client has gone, and asks ``still_running``; a
+    run whose process was killed never writes ``run_finished``.
+    """
     deadline = time.monotonic() + idle_timeout
+    beat = time.monotonic() + heartbeat
     pending = ""
     with path.open(encoding="utf-8") as fh:
         while time.monotonic() < deadline:
             chunk = fh.readline()
             if not chunk:
+                if time.monotonic() >= beat:
+                    if not still_running():
+                        return
+                    beat = time.monotonic() + heartbeat
+                    yield None
                 time.sleep(poll)
                 continue
             pending += chunk

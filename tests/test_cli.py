@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from conveyor.cli import coerce_param, main
+from conveyor.events import follow
 from conveyor.ui.server import make_server
 
 CHURN = str(Path(__file__).resolve().parent.parent / "examples/churn/pipeline.py")
@@ -132,3 +133,28 @@ def test_stream_replays_a_finished_run_and_closes(api):
     payloads = [json.loads(f.split("data: ", 1)[1]) for f in frames]
     assert payloads[-1]["type"] == "run_finished"
     assert frames[0].startswith("id: 1\n")
+
+
+def test_api_answers_bad_requests_instead_of_hanging_up(api, ws):
+    with pytest.raises(urllib.error.HTTPError) as bad:
+        api("/api/runs?limit=abc")
+    assert bad.value.code == 400
+    assert len(json.load(api("/api/runs?limit=0"))) == 1
+
+    run_id = json.load(api("/api/runs"))[0]["id"]
+    (Path(ws) / "runs" / f"{run_id}.jsonl").unlink()
+    for tail in ("events", "stream"):
+        with pytest.raises(urllib.error.HTTPError) as missing:
+            api(f"/api/runs/{run_id}/{tail}")
+        assert missing.value.code == 404
+
+
+def test_follow_gives_up_on_a_run_whose_process_died(tmp_path):
+    path = tmp_path / "run.jsonl"
+    path.write_text('{"seq": 1, "type": "run_started"}\n')
+    stream = follow(path, poll=0.01, heartbeat=0.05, still_running=lambda: False)
+    assert [e["type"] for e in stream] == ["run_started"]
+
+    beats = follow(path, poll=0.01, heartbeat=0.05)
+    assert next(beats)["type"] == "run_started"
+    assert next(beats) is None

@@ -45,12 +45,15 @@ def make_server(workspace: str | Path, host: str, port: int) -> ThreadingHTTPSer
                 return
             try:
                 self.route(parts[1:], parse_qs(url.query))
-            except LookupError as exc:
+            except (LookupError, FileNotFoundError) as exc:
+                # FileNotFoundError: a run row whose events file was pruned
                 self.send_error_json(404, str(exc))
+            except ValueError as exc:
+                self.send_error_json(400, str(exc))
 
         def route(self, parts: list[str], query: dict[str, list[str]]) -> None:
             if parts == ["runs"]:
-                limit = int(query.get("limit", ["50"])[0])
+                limit = max(1, min(int(query.get("limit", ["50"])[0]), 500))
                 self.send_json(lineage.runs(limit=limit))
             elif len(parts) >= 2 and parts[0] == "runs":
                 run_id = lineage.resolve_run(parts[1])
@@ -62,7 +65,7 @@ def make_server(workspace: str | Path, host: str, port: int) -> ThreadingHTTPSer
                 elif tail == ["events"]:
                     self.send_json(read_events(runs_dir / f"{run_id}.jsonl"))
                 elif tail == ["stream"]:
-                    self.stream(runs_dir / f"{run_id}.jsonl")
+                    self.stream(run_id, runs_dir / f"{run_id}.jsonl")
                 else:
                     raise LookupError("unknown endpoint")
             elif len(parts) == 3 and parts[0] == "artifacts" and parts[2] == "value":
@@ -102,15 +105,25 @@ def make_server(workspace: str | Path, host: str, port: int) -> ThreadingHTTPSer
                 return
             self.send_json(store.get(artifact_id, "json"))
 
-        def stream(self, path: Path) -> None:
+        def stream(self, run_id: str, path: Path) -> None:
+            if not path.exists():
+                raise FileNotFoundError(f"run {run_id} has no events file")
+
+            def still_running() -> bool:
+                found = lineage.run(run_id)
+                return found is not None and found["status"] == "running"
+
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
             self.send_header("Cache-Control", "no-store")
             self.send_header("Connection", "close")
             self.end_headers()
             try:
-                for event in follow(path):
-                    chunk = f"id: {event['seq']}\ndata: {json.dumps(event)}\n\n"
+                for event in follow(path, still_running=still_running):
+                    if event is None:
+                        chunk = ": keepalive\n\n"
+                    else:
+                        chunk = f"id: {event['seq']}\ndata: {json.dumps(event)}\n\n"
                     self.wfile.write(chunk.encode())
                     self.wfile.flush()
             except (BrokenPipeError, ConnectionResetError):
