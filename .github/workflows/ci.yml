@@ -1,0 +1,42 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: Install
+        run: pip install -e '.[dev]'
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check .
+      - name: Test
+        run: pytest -q
+      - name: Run the churn pipeline
+        run: conveyor run examples/churn/pipeline.py
+      - name: Run it again, everything must come from the cache
+        run: |
+          conveyor run examples/churn/pipeline.py --quiet
+          conveyor show latest --json | python scripts/assert_cached.py
+      - name: Serve the champion and score one customer
+        run: |
+          conveyor serve churn --port 8000 &
+          for i in $(seq 20); do curl -sf localhost:8000/health && break; sleep 0.5; done
+          curl -sf localhost:8000/predict -H 'Content-Type: application/json' \
+            -d '{"rows": [{"tenure_months": 3, "contract": "monthly", "plan": "premium",
+                 "payment": "invoice", "region": "south", "monthly_charges": 95,
+                 "sessions_30d": 2, "support_tickets_90d": 3, "late_payments_12m": 1}]}'
