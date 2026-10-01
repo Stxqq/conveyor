@@ -91,7 +91,7 @@ export class GraphView {
     this.edgeLayer.setAttribute("height", height);
 
     this.#edges = this.#layout.edges.map((e) => {
-      const g = svg("g", { class: "edge" });
+      const g = svg("g", { class: e.route === "direct" ? "edge" : "edge is-lane" });
       g.append(svg("path", { d: e.d, class: "edge-base" }), svg("path", { d: e.d, class: "edge-ink" }));
       this.edgeLayer.append(g);
       return { ...e, root: g, path: g.lastChild };

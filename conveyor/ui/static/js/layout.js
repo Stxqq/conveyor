@@ -9,8 +9,10 @@
 export const NODE = { w: 96, h: 60 };
 const GAP_X = 30;
 const GAP_Y = 30;
-const LANE = 9;
-const LANE_PAD = 14;
+const LANE = 12;
+const LANE_PAD = 18;
+// Edges meeting at a node spread out by this much instead of landing on one point.
+const PORT = 7;
 
 export function layoutGraph(graph, pad = { x: 24, y: 24 }) {
   const order = topological(graph);
@@ -106,16 +108,31 @@ export function layoutGraph(graph, pad = { x: 24, y: 24 }) {
   }
 
   for (const e of edges) {
+    if (e.route === "lane") e.ly = rowTop.get(e.channel) - LANE_PAD - e.lane * LANE;
+  }
+  // Ports are ordered by where the edge comes from or heads to, top to bottom,
+  // so the fanned-out ends don't cross each other.
+  const heading = (e, end) => {
+    if (e.route === "lane") return e.ly;
+    if (e.route === "along-source") return nodes.get(e.from).cy;
+    if (e.route === "along-target") return nodes.get(e.to).cy;
+    return nodes.get(end).cy;
+  };
+  fan(edges, "to", "dyIn", (e) => heading(e, e.from));
+  fan(edges, "from", "dyOut", (e) => heading(e, e.to));
+
+  for (const e of edges) {
     const s = nodes.get(e.from);
     const t = nodes.get(e.to);
     const x1 = s.x + NODE.w;
     const x2 = t.x;
-    if (e.route === "direct") e.d = curve(x1, s.cy, x2, t.cy);
-    else if (e.route === "along-source") e.d = `M${x1} ${s.cy}H${x2 - GAP_X}` + tail(x2 - GAP_X, s.cy, x2, t.cy);
-    else if (e.route === "along-target") e.d = `M${x1} ${s.cy}` + tail(x1, s.cy, x1 + GAP_X, t.cy) + `H${x2}`;
+    const y1 = s.cy + e.dyOut;
+    const y2 = t.cy + e.dyIn;
+    if (e.route === "direct") e.d = curve(x1, y1, x2, y2);
+    else if (e.route === "along-source") e.d = `M${x1} ${y1}H${x2 - GAP_X}` + tail(x2 - GAP_X, y1, x2, y2);
+    else if (e.route === "along-target") e.d = `M${x1} ${y1}` + tail(x1, y1, x1 + GAP_X, y2) + `H${x2}`;
     else {
-      const ly = rowTop.get(e.channel) - LANE_PAD - e.lane * LANE;
-      e.d = `M${x1} ${s.cy}` + tail(x1, s.cy, x1 + GAP_X, ly) + `H${x2 - GAP_X}` + tail(x2 - GAP_X, ly, x2, t.cy);
+      e.d = `M${x1} ${y1}` + tail(x1, y1, x1 + GAP_X, e.ly) + `H${x2 - GAP_X}` + tail(x2 - GAP_X, e.ly, x2, y2);
     }
   }
 
@@ -126,6 +143,15 @@ export function layoutGraph(graph, pad = { x: 24, y: 24 }) {
     width: pad.x * 2 + layers * NODE.w + (layers - 1) * GAP_X,
     height: y + pad.y,
   };
+}
+
+function fan(edges, end, key, order) {
+  const groups = new Map();
+  for (const e of edges) groups.set(e[end], [...(groups.get(e[end]) ?? []), e]);
+  for (const group of groups.values()) {
+    group.sort((a, b) => order(a) - order(b) || a.b - a.a - (b.b - b.a));
+    group.forEach((e, i) => (e[key] = (i - (group.length - 1) / 2) * PORT));
+  }
 }
 
 function curve(x1, y1, x2, y2) {
