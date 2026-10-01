@@ -45,10 +45,14 @@ def log_loss(y: np.ndarray, p: np.ndarray, eps: float = 1e-12) -> float:
     return float(-np.mean(y * np.log(p) + (1 - y) * np.log(1 - p)))
 
 
-def calibration(y: np.ndarray, p: np.ndarray, bins: int = 10) -> list[dict]:
-    """Reliability table over equal-width probability bins."""
+def _bins(p: np.ndarray, bins: int) -> tuple[np.ndarray, np.ndarray]:
     edges = np.linspace(0, 1, bins + 1)
-    which = np.clip(np.digitize(p, edges[1:-1]), 0, bins - 1)
+    return edges, np.clip(np.digitize(p, edges[1:-1]), 0, bins - 1)
+
+
+def calibration(y: np.ndarray, p: np.ndarray, bins: int = 10) -> list[dict]:
+    """Reliability table over equal-width probability bins, rounded for display."""
+    edges, which = _bins(p, bins)
     table = []
     for b in range(bins):
         mask = which == b
@@ -66,12 +70,15 @@ def calibration(y: np.ndarray, p: np.ndarray, bins: int = 10) -> list[dict]:
     return table
 
 
-def expected_calibration_error(table: list[dict]) -> float:
-    total = sum(row["count"] for row in table)
-    return float(
-        sum(row["count"] * abs(row["predicted"] - row["observed"]) for row in table)
-        / total
+def expected_calibration_error(y: np.ndarray, p: np.ndarray, bins: int = 10) -> float:
+    """Count-weighted gap between mean prediction and churn rate per bin."""
+    _, which = _bins(p, bins)
+    gap = sum(
+        mask.sum() * abs(p[mask].mean() - y[mask].mean())
+        for mask in (which == b for b in range(bins))
+        if mask.any()
     )
+    return float(gap / len(y))
 
 
 def lift_at(y: np.ndarray, score: np.ndarray, fraction: float = 0.1) -> float:

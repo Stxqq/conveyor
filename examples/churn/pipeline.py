@@ -114,7 +114,7 @@ def evaluate(train, split):
         "pr_auc": scoring.average_precision(y, p),
         "log_loss": scoring.log_loss(y, p),
         "brier": float(np.mean((p - y) ** 2)),
-        "ece": scoring.expected_calibration_error(table),
+        "ece": scoring.expected_calibration_error(y, p),
         "lift_top_decile": scoring.lift_at(y, p, 0.1),
         "base_rate": float(y.mean()),
     }
@@ -252,8 +252,8 @@ def monitor(baseline, new_month, score):
         "features_drifting", sum(f["status"] == "drift" for f in features.values())
     )
     for column in flagged:
-        found = features[column]
-        log(f"{column}: PSI {found['psi']:.3f} ({found['status']})")
+        report = features[column]
+        log(f"{column}: PSI {report['psi']:.3f} ({report['status']})")
     return {
         "features": features,
         "flagged": flagged,

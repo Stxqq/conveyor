@@ -61,11 +61,11 @@ def test_log_loss_and_calibration():
     assert scoring.log_loss(y, p) == pytest.approx(expected)
     table = scoring.calibration(y, p, bins=2)
     assert [(r["count"], r["observed"]) for r in table] == [(2, 0.0), (2, 1.0)]
-    assert scoring.expected_calibration_error(table) == pytest.approx(0.175)
+    assert scoring.expected_calibration_error(y, p, bins=2) == pytest.approx(0.175)
 
 
 def test_lift_at_top_decile():
-    y = np.array([1] + [0] * 9 + [1] * 0 + [0] * 10)
+    y = np.array([1] + [0] * 19)  # one churner, ranked first
     s = -np.arange(20.0)
     assert scoring.lift_at(y, s, 0.1) == pytest.approx(0.5 / 0.05)
 
