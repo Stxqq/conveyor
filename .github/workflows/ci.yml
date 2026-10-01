@@ -40,3 +40,13 @@ jobs:
             -d '{"rows": [{"tenure_months": 3, "contract": "monthly", "plan": "premium",
                  "payment": "invoice", "region": "south", "monthly_charges": 95,
                  "sessions_30d": 2, "support_tickets_90d": 3, "late_payments_12m": 1}]}'
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Layout, replay and event folding against the recorded runs
+        run: node --test "tests/ui/*.test.mjs"

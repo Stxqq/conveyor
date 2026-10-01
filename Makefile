@@ -3,7 +3,7 @@ VENV   := .venv
 BIN    := $(VENV)/bin
 CHURN  := examples/churn/pipeline.py
 
-.PHONY: install test lint format demo rerun ui serve record site docker clean
+.PHONY: install test test-ui lint format demo rerun ui serve record site docker clean
 
 $(BIN)/conveyor: pyproject.toml
 	$(PYTHON) -m venv $(VENV)
@@ -15,6 +15,9 @@ install: $(BIN)/conveyor
 
 test: install
 	$(BIN)/pytest -q
+
+test-ui:
+	node --test "tests/ui/*.test.mjs"
 
 lint: install
 	$(BIN)/ruff check .
