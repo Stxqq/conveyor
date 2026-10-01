@@ -242,7 +242,12 @@ $ curl -s localhost:8000/predict -d '{"rows": [
 `conveyor ui` serves the run viewer on port 5300 with a small JSON API:
 `/api/runs`, `/api/runs/<id>`, `/api/runs/<id>/events`, `/api/runs/<id>/stream`
 (server-sent events, live while the run is going), `/api/artifacts/<id>` for
-lineage and `/api/models` for the registry.
+lineage and `/api/models` for the registry. The page shows the runs list, the
+graph filling in as steps start, finish or come from the cache, a timeline of
+every attempt and backoff, and the model card with its calibration and drift.
+The [live demo](https://stxqq.github.io/conveyor/) is the same page with no
+server behind it: `make site` copies it next to the recorded runs in
+`docs/runs/` and it replays those instead.
 
 From Python:
 
@@ -274,7 +279,7 @@ conveyor/
   ui/            API server and the frontend
 examples/churn/  data, features, Newton logistic regression, metrics, PSI, pipeline
 scripts/         record_demo.py (docs/runs/*.json), assert_cached.py (CI)
-tests/           60 tests, about 3.4 s
+tests/           60 Python tests in 3.4 s; tests/ui/ runs under node --test
 ```
 
 ## Results
