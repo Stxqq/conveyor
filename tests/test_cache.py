@@ -212,3 +212,20 @@ def test_values_captured_by_a_step_factory_are_part_of_the_key(executor):
     assert other.steps["scaled"].status == "succeeded"
     assert other.output("scaled") == 15
 
+
+def test_cache_false_runs_every_time_and_downstream_still_hits(executor):
+    @step(cache=False)
+    def lookup():
+        calls.append("lookup")
+        return "v1"
+
+    @step
+    def use(lookup):
+        calls.append("use")
+        return lookup.upper()
+
+    executor.run(Pipeline("p", [lookup, use]))
+    calls.clear()
+    again = executor.run(Pipeline("p", [lookup, use]))
+    assert statuses(again) == {"lookup": "succeeded", "use": "cached"}
+    assert calls == ["lookup"]

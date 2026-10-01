@@ -25,6 +25,7 @@ class Step:
     timeout: float | None = None
     retry_on: tuple[type[BaseException], ...] = (Exception,)
     version: str = ""
+    cache: bool = True
 
     @cached_property
     def fingerprint(self) -> str:
@@ -48,12 +49,15 @@ def step(
     timeout: float | None = None,
     retry_on: tuple[type[BaseException], ...] = (Exception,),
     version: str = "",
+    cache: bool = True,
 ) -> Any:
     """Turn a function into a pipeline step.
 
     Use bare (``@step``) or with options (``@step(retries=3, timeout=30)``).
     The cache follows the step's code into your own modules; bump ``version``
     when something it can't see changes, like a file the step reads.
+    ``cache=False`` runs the step every time, for reads and writes of outside
+    state such as a model registry.
     """
 
     def wrap(f: Callable[..., Any]) -> Step:
@@ -77,6 +81,7 @@ def step(
             timeout=timeout,
             retry_on=retry_on,
             version=version,
+            cache=cache,
         )
 
     return wrap(fn) if fn is not None else wrap

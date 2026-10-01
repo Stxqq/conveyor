@@ -1,4 +1,5 @@
 import json
+import shutil
 import threading
 import urllib.request
 from types import SimpleNamespace
@@ -37,9 +38,35 @@ def test_cold_run_trains_a_useful_model(runs):
     assert report["train_months"] == [0, 9] and report["test_months"] == [10, 11]
 
 
-def test_rerun_is_served_entirely_from_cache(runs):
-    assert runs.warm.count("cached") == len(pipeline.order)
+def test_rerun_only_asks_the_registry_again(runs):
+    ran = [n for n, s in runs.warm.steps.items() if s.status == "succeeded"]
+    assert ran == ["gate", "register"]
+    assert runs.warm.output("gate")["reason"] == "already the champion"
+    assert runs.warm.steps["score"].status == "cached"
     assert runs.warm.output("monitor") == runs.cold.output("monitor")
+
+
+def test_cache_never_replays_a_stale_champion(tmp_path):
+    from conveyor import Executor
+
+    ex = Executor(tmp_path / "ws")
+    weak = ex.run(pipeline, {"l2": 1000.0})
+    strong = ex.run(pipeline)
+    assert strong.output("register")["champion"] == 2
+    # the weak model's run again: every input is cached, but the registry moved
+    again = ex.run(pipeline, {"l2": 1000.0})
+    assert again.output("register") == {"model": "churn", "version": 1, "champion": 2}
+    assert again.output("score")["score"].mean() == pytest.approx(
+        strong.output("score")["score"].mean()
+    )
+    assert again.output("score")["score"].mean() != pytest.approx(
+        weak.output("score")["score"].mean()
+    )
+
+    shutil.rmtree(ex.workspace / "registry")
+    fresh = ex.run(pipeline)
+    assert fresh.output("gate")["reason"] == "no champion yet"
+    assert ModelRegistry(ex.workspace).resolve("churn").version == 1
 
 
 def test_gate_keeps_the_champion_when_the_challenger_is_worse(runs):
@@ -47,7 +74,7 @@ def test_gate_keeps_the_champion_when_the_challenger_is_worse(runs):
     assert decision["promote"] is False
     assert decision["gain"] < 0
     reg = runs.stricter.output("register")
-    assert reg == {"model": "churn", "version": 2, "champion": 1, "promoted": False}
+    assert reg == {"model": "churn", "version": 2, "champion": 1}
     # score re-ran against the unchanged champion, produced the same artifact,
     # so monitor was a cache hit
     assert runs.stricter.steps["score"].status == "succeeded"

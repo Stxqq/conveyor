@@ -53,7 +53,10 @@ def test_run_then_rerun_from_cache(ws, capsys):
     capsys.readouterr()
     assert main(["--workspace", ws, "show", "latest", "--json"]) == 0
     run = json.loads(capsys.readouterr().out)
-    assert {s["status"] for s in run["steps"]} == {"cached"}
+    statuses = {s["step"]: s["status"] for s in run["steps"]}
+    assert statuses.pop("gate") == statuses.pop("register") == "succeeded"
+    assert set(statuses.values()) == {"cached"}
+    assert [n["name"] for n in run["graph"] if not n["cache"]] == ["gate", "register"]
 
     assert main(["--workspace", ws, "runs", "--json"]) == 0
     assert len(json.loads(capsys.readouterr().out)) == 2

@@ -71,6 +71,7 @@ class Pipeline:
                 "params": self.step_params(n),
                 "retries": self.steps[n].retries,
                 "timeout": self.steps[n].timeout,
+                "cache": self.steps[n].cache,
             }
             for n in self.order
         ]

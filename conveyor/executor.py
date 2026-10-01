@@ -229,7 +229,11 @@ class _Run:
                 key = cache_key(
                     name, step.fingerprint, step.version, self._params_for(name), inputs
                 )
-                if self.ex.cache and self._serve_from_cache(name, key, inputs):
+                if (
+                    self.ex.cache
+                    and step.cache
+                    and self._serve_from_cache(name, key, inputs)
+                ):
                     progressed = True
                     continue
                 queued.add(name)

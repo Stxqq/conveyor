@@ -128,7 +128,9 @@ def evaluate(train, split):
     return report
 
 
-@step
+# gate and register read and write the registry, which lives outside the cache
+# key; replaying an old decision would disagree with what the registry holds.
+@step(cache=False)
 def gate(train, evaluate, split, min_auc_gain: float = 0.002):
     """Champion/challenger: both models score the same test months; the
     challenger wins only by a margin, so noise doesn't churn the champion."""
@@ -160,7 +162,7 @@ def gate(train, evaluate, split, min_auc_gain: float = 0.002):
     return decision
 
 
-@step
+@step(cache=False)
 def register(train, evaluate, gate):
     registry = current().registry
     card = {
@@ -197,12 +199,8 @@ def register(train, evaluate, gate):
     champion = registry.champion(MODEL)
     assert champion is not None
     log(f"registered {version.ref}, champion is v{champion.version}")
-    return {
-        "model": MODEL,
-        "version": version.version,
-        "champion": champion.version,
-        "promoted": bool(gate["promote"]),
-    }
+    # Only what score needs: an unchanged champion keeps score and monitor cached.
+    return {"model": MODEL, "version": version.version, "champion": champion.version}
 
 
 @step(retries=3, backoff=0.25)
