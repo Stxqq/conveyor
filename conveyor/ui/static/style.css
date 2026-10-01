@@ -359,9 +359,12 @@ a.f-value:hover { color: var(--ink); }
   position: absolute; top: 0;
   transform: translateX(-50%);
   font-family: var(--mono); font-size: 9px; letter-spacing: .04em;
-  color: rgba(17, 17, 19, .5);
+  color: #8a8a92;
   white-space: nowrap;
+  transition: color .3s var(--ease);
 }
+/* only the label fades under the playhead's pill; the gridline stays */
+.tl-axis span.is-near { color: transparent; }
 .tl-axis span:first-child { transform: none; }
 .tl-axis span::after {
   content: "";
@@ -376,7 +379,7 @@ a.f-value:hover { color: var(--ink); }
   height: calc(var(--rows, 13) * 30px + 8px);
   background: var(--ink);
   will-change: transform;
-  transition: opacity .3s;
+  transition: opacity .3s var(--ease);
 }
 .tl-head span {
   position: absolute; left: 0; top: -16px;
@@ -393,6 +396,8 @@ a.f-value:hover { color: var(--ink); }
   display: grid; grid-template-columns: var(--name) 1fr;
   align-items: center;
   height: 30px;
+  animation: rise .45s var(--ease) both;
+  animation-delay: calc(var(--i) * 40ms);
 }
 .tl-name {
   font-size: 12.5px; font-weight: 500;
@@ -421,14 +426,22 @@ a.f-value:hover { color: var(--ink); }
   height: 0;
   border-top: 1px dashed #b9b9c0;
 }
+/* the white backing hides the playhead where it crosses a note */
 .tl-note {
   position: absolute; top: 50%;
-  transform: translate(9px, -50%);
+  transform: translate(6px, -50%);
+  padding: 0 3px;
+  border-radius: 4px;
+  background: #fff;
   font-family: var(--mono); font-size: 9.5px; letter-spacing: .02em;
-  color: var(--gray);
+  color: #8a8a92;
   white-space: nowrap;
-  animation: fade .35s ease;
+  animation: fade .35s var(--ease);
 }
+.tl-note.is-tick { transform: translate(4px, -50%); }
+.tl-note.is-flip { transform: translate(calc(-100% - 6px), -50%); }
+.tl-note.is-tick.is-flip { transform: translate(calc(-100% - 4px), -50%); }
+.tl-note.is-above { transform: translate(calc(-100% + 3px), calc(-50% - 11px)); background: none; }
 .tl-legend {
   display: flex; flex-wrap: wrap; gap: 6px 18px;
   margin: 18px 0 0 var(--name);

@@ -59,7 +59,7 @@ export class TimelineView {
 
     for (const [name, step] of run.steps) {
       const row = this.#rows.get(name);
-      const html = bars(step, at, now);
+      const html = bars(step, at, now, this.#plotWidth);
       if (row.dataset.html !== html) {
         row.dataset.html = html;
         row.innerHTML = html;
@@ -69,6 +69,11 @@ export class TimelineView {
 
     const x = (wall / span) * this.#plotWidth;
     this.head.style.transform = `translate3d(${x}px,0,0)`;
+    // the playhead's label would sit on top of the nearest tick labels
+    for (const tick of this.axis.children) {
+      const tx = (parseFloat(tick.style.left) / 100) * this.#plotWidth;
+      tick.classList.toggle("is-near", !this.head.classList.contains("is-idle") && Math.abs(tx - x) < 46);
+    }
     this.head.lastChild.textContent = duration(wall) || "0";
     this.head.classList.toggle("is-idle", player.index === 0 && !player.live);
   }
@@ -90,19 +95,27 @@ export class TimelineView {
   }
 }
 
-function bars(step, at, now) {
+// Notes sit right of where a step ended. Near the end of the plot that would
+// run off the card, so they move left of the point instead, or above the bar
+// when there is one to cover.
+function note(left, text, width, { kind = "", bar = false } = {}) {
+  const room = ((100 - left) / 100) * width;
+  const cramped = room < text.length * 6.2 + 16;
+  const place = cramped ? (bar ? " is-above" : " is-flip") : "";
+  return `<span class="tl-note${kind}${place}" style="left:${left}%">${text}</span>`;
+}
+
+function bars(step, at, now, width) {
   if (step.status === "cached") {
-    return `<i class="tl-bar bar-cached" style="left:${at(step.finishedAt)}%"></i><span class="tl-note" style="left:${at(step.finishedAt)}%">cached</span>`;
+    const left = at(step.finishedAt);
+    return `<i class="tl-bar bar-cached" style="left:${left}%"></i>${note(left, "cached", width, { kind: " is-tick" })}`;
   }
-  if (step.status === "skipped") {
-    return `<span class="tl-note is-skip" style="left:${at(step.finishedAt)}%">skipped</span>`;
-  }
+  if (step.status === "skipped") return note(at(step.finishedAt), "skipped", width);
   const parts = [];
   step.attempts.forEach((attempt, i) => {
     const end = attempt.end ?? now;
-    const kind = { ok: "ok", retry: "retry", failed: "failed", running: "running" }[attempt.outcome];
     parts.push(
-      `<i class="tl-bar bar-${kind}" style="left:${at(attempt.start)}%;width:${Math.max(0, at(end) - at(attempt.start))}%"></i>`,
+      `<i class="tl-bar bar-${attempt.outcome}" style="left:${at(attempt.start)}%;width:${Math.max(0, at(end) - at(attempt.start))}%"></i>`,
     );
     const next = step.attempts[i + 1];
     if (attempt.outcome === "retry") {
@@ -111,7 +124,7 @@ function bars(step, at, now) {
     }
   });
   if (step.status === "succeeded" || step.status === "failed") {
-    parts.push(`<span class="tl-note" style="left:${at(step.finishedAt)}%">${duration(step.duration)}</span>`);
+    parts.push(note(at(step.finishedAt), duration(step.duration), width, { bar: true }));
   }
   return parts.join("");
 }
