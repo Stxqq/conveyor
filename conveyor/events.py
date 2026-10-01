@@ -26,8 +26,11 @@ class EventLog:
         self._seq = 0
         self._listeners = list(listeners or [])
 
-    def emit(self, kind: str, /, **fields: Any) -> dict[str, Any]:
+    def emit(self, kind: str, /, **fields: Any) -> dict[str, Any] | None:
         with self._lock:
+            if self._fh.closed:
+                # an abandoned step thread outliving its run
+                return None
             self._seq += 1
             event = {"seq": self._seq, "ts": round(time.time(), 4), "type": kind}
             event.update(json_safe(fields))
@@ -42,7 +45,8 @@ class EventLog:
         return event
 
     def close(self) -> None:
-        self._fh.close()
+        with self._lock:
+            self._fh.close()
 
 
 def read_events(path: Path) -> list[dict[str, Any]]:

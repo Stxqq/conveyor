@@ -282,83 +282,87 @@ class _Run:
 
     def _attempt(self, name: str, inputs: dict[str, str]) -> _Attempted:
         step = self.pipeline.steps[name]
-        out = _Attempted(started_at=time.time())
+        tried = _Attempted(started_at=time.time())
         t0 = time.perf_counter()
-        ctx = StepContext(self.id, name, 0, self.ex.workspace, self.events)
         try:
             kwargs = {u: self._value_of(u) for u in inputs}
             kwargs.update(self._params_for(name))
-            out.value = self._call_with_retries(step, kwargs, ctx, out)
-            out.artifact = self.ex.store.put(out.value)
+            tried.value = self._call_with_retries(step, kwargs, tried)
+            tried.artifact = self.ex.store.put(tried.value)
         except Exception as exc:
-            out.error = "".join(traceback.format_exception_only(type(exc), exc)).strip()
+            tried.error = "".join(
+                traceback.format_exception_only(type(exc), exc)
+            ).strip()
             self.events.emit(
                 "step_traceback", step=name, traceback=_trim_traceback(exc)
             )
-        out.duration = time.perf_counter() - t0
-        out.metrics = ctx.metrics
-        return out
+        tried.duration = time.perf_counter() - t0
+        return tried
 
     def _call_with_retries(
-        self, step: Step, kwargs: dict[str, Any], ctx: StepContext, out: _Attempted
+        self, step: Step, kwargs: dict[str, Any], tried: _Attempted
     ) -> Any:
         while True:
-            out.attempts += 1
-            ctx.attempt = out.attempts
-            self.events.emit("step_started", step=step.name, attempt=out.attempts)
+            tried.attempts += 1
+            # A fresh context per attempt: a timed-out attempt keeps running in
+            # the background and must not log into the one that replaced it.
+            ctx = StepContext(
+                self.id, step.name, tried.attempts, self.ex.workspace, self.events
+            )
+            tried.metrics = ctx.metrics
+            self.events.emit("step_started", step=step.name, attempt=tried.attempts)
             try:
                 return _call(step, kwargs, ctx)
             except Exception as exc:
-                if not isinstance(exc, step.retry_on) or out.attempts > step.retries:
+                if not isinstance(exc, step.retry_on) or tried.attempts > step.retries:
                     raise
-                delay = backoff_delay(step.backoff, out.attempts)
+                delay = backoff_delay(step.backoff, tried.attempts)
                 self.events.emit(
                     "step_retry",
                     step=step.name,
-                    attempt=out.attempts,
+                    attempt=tried.attempts,
                     error=f"{type(exc).__name__}: {exc}",
                     delay=round(delay, 3),
                 )
                 time.sleep(delay)
 
     def _settle(
-        self, name: str, key: str, inputs: dict[str, str], res: _Attempted
+        self, name: str, key: str, inputs: dict[str, str], tried: _Attempted
     ) -> None:
         self.in_flight.discard(name)
-        finished = res.started_at + res.duration
-        if res.error is None:
-            assert res.artifact is not None
-            art = res.artifact
+        finished = tried.started_at + tried.duration
+        if tried.error is None:
+            assert tried.artifact is not None
+            art = tried.artifact
             self.ex.lineage.add_artifact(art.id, art.kind, art.size, finished)
             self.ex.lineage.record_step(
                 self.id,
                 name,
                 "succeeded",
                 cache_key=key,
-                attempts=res.attempts,
-                started_at=res.started_at,
+                attempts=tried.attempts,
+                started_at=tried.started_at,
                 finished_at=finished,
                 output=art.id,
                 inputs=inputs,
-                metrics=res.metrics,
+                metrics=tried.metrics,
             )
             self.outcomes[name] = StepOutcome(
                 name,
                 "succeeded",
-                res.attempts,
-                res.duration,
-                key,
-                art,
-                None,
-                res.metrics,
+                attempts=tried.attempts,
+                duration=tried.duration,
+                cache_key=key,
+                artifact=art,
+                metrics=tried.metrics,
             )
             with self._values_lock:
-                self.values[name] = res.value
+                self.values[name] = tried.value
             self.events.emit(
                 "step_succeeded",
                 step=name,
-                attempts=res.attempts,
-                duration=round(res.duration, 4),
+                attempts=tried.attempts,
+                duration=round(tried.duration, 4),
                 cache_key=key,
                 artifact=art.id,
                 kind=art.kind,
@@ -372,29 +376,28 @@ class _Run:
             name,
             "failed",
             cache_key=key,
-            attempts=res.attempts,
-            started_at=res.started_at,
+            attempts=tried.attempts,
+            started_at=tried.started_at,
             finished_at=finished,
-            error=res.error,
+            error=tried.error,
             inputs=inputs,
-            metrics=res.metrics,
+            metrics=tried.metrics,
         )
         self.outcomes[name] = StepOutcome(
             name,
             "failed",
-            res.attempts,
-            res.duration,
-            key,
-            None,
-            res.error,
-            res.metrics,
+            attempts=tried.attempts,
+            duration=tried.duration,
+            cache_key=key,
+            error=tried.error,
+            metrics=tried.metrics,
         )
         self.events.emit(
             "step_failed",
             step=name,
-            attempts=res.attempts,
-            duration=round(res.duration, 4),
-            error=res.error,
+            attempts=tried.attempts,
+            duration=round(tried.duration, 4),
+            error=tried.error,
         )
         for child in self.pipeline.downstream(name):
             if child in self.outcomes:
@@ -446,6 +449,7 @@ def _call(step: Step, kwargs: dict[str, Any], ctx: StepContext) -> Any:
     worker.start()
     worker.join(step.timeout)
     if worker.is_alive():
+        ctx.abandoned = True
         raise StepTimeout(f"{step.name} took longer than {step.timeout:g}s")
     if "error" in box:
         raise box["error"]

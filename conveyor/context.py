@@ -21,13 +21,19 @@ class StepContext:
     workspace: Path
     events: EventLog
     metrics: dict[str, float | None] = field(default_factory=dict)
+    # set when the attempt timed out; whatever it still logs is dropped
+    abandoned: bool = False
 
     def log_metric(self, name: str, value: float) -> None:
+        if self.abandoned:
+            return
         value = float(value)
         self.metrics[name] = value if math.isfinite(value) else None
         self.events.emit("metric", step=self.step, name=name, value=value)
 
     def log(self, message: str) -> None:
+        if self.abandoned:
+            return
         self.events.emit("log", step=self.step, message=message)
 
     @property

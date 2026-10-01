@@ -5,6 +5,7 @@ import time
 import pytest
 
 from conveyor import Pipeline, StepTimeout, current, log_metric, step
+from conveyor.events import EventLog
 
 
 def test_independent_steps_really_run_at_the_same_time(executor):
@@ -174,3 +175,30 @@ def test_metrics_land_in_lineage_and_events(executor):
 def test_current_outside_a_step():
     with pytest.raises(RuntimeError, match="not inside"):
         current()
+
+
+def test_an_abandoned_attempt_cannot_log_into_the_next_one(executor):
+    # attempt 1 times out at 0.4 s and wakes at 0.6 s, while attempt 2 is busy
+    @step(timeout=0.4, retries=1, backoff=0.01)
+    def slow():
+        if current().attempt == 1:
+            time.sleep(0.6)
+            log_metric("from_attempt_1", 1)
+            return "late"
+        time.sleep(0.3)
+        log_metric("from_attempt_2", 2)
+        return "on time"
+
+    result = executor.run(Pipeline("p", [slow]))
+    assert result.output("slow") == "on time"
+    assert result.steps["slow"].metrics == {"from_attempt_2": 2}
+    events = [json.loads(line) for line in result.events_path.open()]
+    assert [e["name"] for e in events if e["type"] == "metric"] == ["from_attempt_2"]
+
+
+def test_events_after_close_are_dropped(tmp_path):
+    log = EventLog(tmp_path / "run.jsonl")
+    log.emit("run_started")
+    log.close()
+    assert log.emit("metric", name="late") is None
+    assert len((tmp_path / "run.jsonl").read_text().splitlines()) == 1
