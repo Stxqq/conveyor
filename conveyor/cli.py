@@ -62,7 +62,6 @@ def human_size(n: int | None) -> str:
         if size < 1024 or unit == "GB":
             return f"{size:.0f} {unit}" if unit == "B" else f"{size:.1f} {unit}"
         size /= 1024
-    return ""
 
 
 def human_duration(seconds: float | None) -> str:
@@ -106,6 +105,7 @@ def metric_lines(metrics: dict[str, Any], per_line: int = 4) -> list[str]:
 
 
 def coerce_param(raw: str, current: Any) -> Any:
+    # bool first: isinstance(True, int) is True
     if isinstance(current, bool):
         lowered = raw.lower()
         if lowered not in ("true", "false", "1", "0", "yes", "no"):
@@ -297,7 +297,7 @@ def cmd_show(args: argparse.Namespace, out: Out) -> int:
             + "  ".join(f"{k}={v}" for k, v in run["params"].items())
         )
     out.line()
-    width = max(len(s["step"]) for s in run["steps"]) + 2
+    width = max((len(s["step"]) for s in run["steps"]), default=6) + 2
     for s in run["steps"]:
         took = ""
         if s["status"] == "succeeded":
