@@ -16,11 +16,10 @@ const SPEEDS = [
   [1, "1×"],
   [2, "2×"],
 ];
-const LEDE = {
-  recorded:
-    "A small pipeline engine for ML in plain Python. These are five recorded runs of its churn example, replayed in your browser at a fifteenth of their speed.",
-  live: "Runs in this workspace. Start one with <code>conveyor run</code> and it shows up here while it happens.",
-};
+// The recorded lede is already in index.html, so the page doesn't reflow on load.
+const LIVE_LEDE = "Runs in this workspace. Start one with <code>conveyor run</code> and it shows up here while it happens.";
+const PILL = { width: 84, gap: 6, narrow: 74 };
+const narrow = matchMedia("(max-width: 720px)");
 
 const source = openSource();
 const query = new URLSearchParams(location.search);
@@ -42,7 +41,7 @@ const views = {
 const player = new Player(render);
 const transport = bindTransport();
 
-$("#lede").innerHTML = LEDE[source.live ? "live" : "recorded"];
+if (source.live) $("#lede").innerHTML = LIVE_LEDE;
 document.body.classList.add(source.live ? "is-live-source" : "is-recorded-source");
 
 function render() {
@@ -234,6 +233,7 @@ function bindTransport() {
       root.classList.toggle("is-playing", player.playing);
       root.classList.toggle("is-ended", player.ended && !player.playing);
       root.classList.toggle("is-live", player.live);
+      root.classList.toggle("is-empty", !player.events.length && !player.live);
       live.hidden = !player.live;
       play.setAttribute("aria-label", player.playing ? "Pause" : player.ended ? "Replay" : "Play");
       const k = player.progress;

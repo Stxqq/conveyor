@@ -15,7 +15,11 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="conveyor">
 <meta name="twitter:description" content="A small pipeline engine for ML: steps wired by name, a content-addressed cache, retries, lineage and a live run view.">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
 <meta name="twitter:image" content="https://stxqq.github.io/conveyor/social.png">
+<meta name="twitter:image:alt" content="The conveyor run graph of a churn pipeline">
+<link rel="canonical" href="https://stxqq.github.io/conveyor/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23fff'/%3E%3Ccircle cx='8' cy='16' r='3' fill='%23111113'/%3E%3Ccircle cx='24' cy='9' r='3' fill='%23111113'/%3E%3Ccircle cx='24' cy='23' r='3' fill='%23111113'/%3E%3Cpath d='M11 15l10-5M11 17l10 5' stroke='%23111113' stroke-width='2'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 <link rel="stylesheet" href="style.css">
@@ -32,7 +36,7 @@
 <div id="page">
   <header class="intro">
     <p class="dear">conveyor</p>
-    <p class="gray" id="lede">A small pipeline engine for ML in plain Python.</p>
+    <p class="gray" id="lede">A small pipeline engine for ML in plain Python. These are five recorded runs of its churn example, replayed in your browser at a fifteenth of their speed.</p>
   </header>
 
   <main class="stage" id="stage">
@@ -62,7 +66,7 @@
   </footer>
 </div>
 
-<div class="transport" id="transport">
+<div class="transport is-empty" id="transport">
   <button class="t-play" type="button" aria-label="Play">
     <svg class="i-play" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 2.2v9.6a.6.6 0 0 0 .9.5l7.6-4.8a.6.6 0 0 0 0-1L4.4 1.7a.6.6 0 0 0-.9.5z" fill="currentColor"/></svg>
     <svg class="i-pause" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="3" y="2" width="3" height="10" rx="1" fill="currentColor"/><rect x="8" y="2" width="3" height="10" rx="1" fill="currentColor"/></svg>

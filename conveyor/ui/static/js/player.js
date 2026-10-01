@@ -61,7 +61,7 @@ export class Player {
   }
 
   get ended() {
-    return !this.live && this.t >= this.length;
+    return !this.live && this.length > 0 && this.t >= this.length;
   }
 
   get progress() {

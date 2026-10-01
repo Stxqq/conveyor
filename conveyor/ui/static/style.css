@@ -773,7 +773,7 @@ a.f-value:hover { color: var(--ink); }
   font-size: 12px; font-weight: 600;
   color: var(--gray);
   cursor: pointer;
-  transition: color .3s;
+  transition: color .3s var(--ease), background-color .3s var(--ease);
 }
 .t-chip:hover { color: var(--ink); }
 .t-chip.active { background: #111; color: #fff; }
