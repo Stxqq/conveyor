@@ -1,9 +1,9 @@
 [
  {
   "seq": 1,
-  "ts": 1790860757.3689,
+  "ts": 1790863436.4201,
   "type": "run_started",
-  "run_id": "20261001-151917-fb23",
+  "run_id": "20261001-160356-22ff",
   "pipeline": "churn",
   "params": {
    "seed": 7,
@@ -25,7 +25,8 @@
      "corrupt"
     ],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "validate",
@@ -34,7 +35,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "split",
@@ -45,7 +47,8 @@
      "test_months"
     ],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "encoder",
@@ -54,7 +57,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "features",
@@ -64,7 +68,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "baseline",
@@ -73,7 +78,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "train",
@@ -85,7 +91,8 @@
      "l2"
     ],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "evaluate",
@@ -95,7 +102,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "gate",
@@ -108,7 +116,8 @@
      "min_auc_gain"
     ],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": false
    },
    {
     "name": "register",
@@ -119,7 +128,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": false
    },
    {
     "name": "new_month",
@@ -131,7 +141,8 @@
      "flaky_reads"
     ],
     "retries": 3,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "score",
@@ -141,7 +152,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "monitor",
@@ -152,7 +164,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    }
   ],
   "workers": 8,
@@ -160,134 +173,134 @@
  },
  {
   "seq": 2,
-  "ts": 1790860757.3692,
+  "ts": 1790863436.4206,
   "type": "step_cached",
   "step": "new_month",
-  "cache_key": "5202021161c2aa63345ef4bb9dddcddeeb1ad229b7d1c46b0842427d4ab2f34c",
+  "cache_key": "00bd64f6892d1cd4aad838ba61e3c2174cc5e5fbeb4cf1c24a812237c1c1e43e",
   "artifact": "92143de9cd160687a9786094d0952df1468ebffcdd8cd1ddd2dccce4f6cf9e45",
   "kind": "table",
   "size": 35761,
-  "source_run": "20261001-151916-1b25",
+  "source_run": "20261001-160355-7285",
   "metrics": {}
  },
  {
   "seq": 3,
-  "ts": 1790860757.3692,
+  "ts": 1790863436.4208,
   "type": "step_started",
   "step": "customers",
   "attempt": 1
  },
  {
   "seq": 4,
-  "ts": 1790860757.4607,
+  "ts": 1790863436.4954,
   "type": "step_succeeded",
   "step": "customers",
   "attempts": 1,
-  "duration": 0.0909,
-  "cache_key": "956c3f5f4c6150feebd1caa72c04c2676a39cc5e4e3ed311b1fa7b1e9e868cc5",
+  "duration": 0.0743,
+  "cache_key": "405c85c6fb1a204a6cddccd13b8805febd9d293140164e4dc706c84187a03f8a",
   "artifact": "dd185533705f24a485e3713448df92ef611c2e6d4ca9b4d2e07f530a6229f2ca",
   "kind": "table",
   "size": 404513
  },
  {
   "seq": 5,
-  "ts": 1790860757.4609,
+  "ts": 1790863436.4955,
   "type": "step_started",
   "step": "validate",
   "attempt": 1
  },
  {
   "seq": 6,
-  "ts": 1790860757.465,
+  "ts": 1790863436.4975,
   "type": "step_traceback",
   "step": "validate",
   "traceback": "  File \"examples/churn/pipeline.py\", line 37, in validate\n    raise ValidationError(\nchurn.pipeline.ValidationError: 3 checks failed on 24076 rows\ntenure_months           225 rows below 0 (lowest -73)\nage                     315 rows above 100 (highest 314.5)\ncontract                171 rows not in levels: 'montly'"
  },
  {
   "seq": 7,
-  "ts": 1790860757.4655,
+  "ts": 1790863436.4977,
   "type": "step_failed",
   "step": "validate",
   "attempts": 1,
-  "duration": 0.0042,
+  "duration": 0.002,
   "error": "churn.pipeline.ValidationError: 3 checks failed on 24076 rows\ntenure_months           225 rows below 0 (lowest -73)\nage                     315 rows above 100 (highest 314.5)\ncontract                171 rows not in levels: 'montly'"
  },
  {
   "seq": 8,
-  "ts": 1790860757.4657,
+  "ts": 1790863436.4978,
   "type": "step_skipped",
   "step": "split",
   "because": "validate"
  },
  {
   "seq": 9,
-  "ts": 1790860757.4658,
+  "ts": 1790863436.4979,
   "type": "step_skipped",
   "step": "encoder",
   "because": "validate"
  },
  {
   "seq": 10,
-  "ts": 1790860757.4659,
+  "ts": 1790863436.498,
   "type": "step_skipped",
   "step": "features",
   "because": "validate"
  },
  {
   "seq": 11,
-  "ts": 1790860757.466,
+  "ts": 1790863436.4981,
   "type": "step_skipped",
   "step": "baseline",
   "because": "validate"
  },
  {
   "seq": 12,
-  "ts": 1790860757.4661,
+  "ts": 1790863436.4982,
   "type": "step_skipped",
   "step": "train",
   "because": "validate"
  },
  {
   "seq": 13,
-  "ts": 1790860757.4663,
+  "ts": 1790863436.4983,
   "type": "step_skipped",
   "step": "evaluate",
   "because": "validate"
  },
  {
   "seq": 14,
-  "ts": 1790860757.4664,
+  "ts": 1790863436.4984,
   "type": "step_skipped",
   "step": "gate",
   "because": "validate"
  },
  {
   "seq": 15,
-  "ts": 1790860757.4665,
+  "ts": 1790863436.4985,
   "type": "step_skipped",
   "step": "register",
   "because": "validate"
  },
  {
   "seq": 16,
-  "ts": 1790860757.4666,
+  "ts": 1790863436.4986,
   "type": "step_skipped",
   "step": "score",
   "because": "validate"
  },
  {
   "seq": 17,
-  "ts": 1790860757.4667,
+  "ts": 1790863436.4987,
   "type": "step_skipped",
   "step": "monitor",
   "because": "validate"
  },
  {
   "seq": 18,
-  "ts": 1790860757.4668,
+  "ts": 1790863436.4987,
   "type": "run_finished",
   "status": "failed",
-  "duration": 0.0981,
+  "duration": 0.0788,
   "counts": {
    "succeeded": 1,
    "cached": 1,

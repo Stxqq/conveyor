@@ -1,0 +1,7 @@
+{
+ "challenger_auc": 0.7984636920848568,
+ "min_gain": 0.002,
+ "promote": false,
+ "champion": 1,
+ "reason": "already the champion"
+}

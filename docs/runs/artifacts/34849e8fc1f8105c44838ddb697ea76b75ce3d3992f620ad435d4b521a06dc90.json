@@ -1,6 +1,5 @@
 {
  "model": "churn",
  "version": 1,
- "champion": 1,
- "promoted": true
+ "champion": 1
 }

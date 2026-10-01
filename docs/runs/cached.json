@@ -1,9 +1,9 @@
 [
  {
   "seq": 1,
-  "ts": 1790860756.8232,
+  "ts": 1790863435.8671,
   "type": "run_started",
-  "run_id": "20261001-151916-a504",
+  "run_id": "20261001-160355-9285",
   "pipeline": "churn",
   "params": {
    "seed": 7,
@@ -25,7 +25,8 @@
      "corrupt"
     ],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "validate",
@@ -34,7 +35,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "split",
@@ -45,7 +47,8 @@
      "test_months"
     ],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "encoder",
@@ -54,7 +57,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "features",
@@ -64,7 +68,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "baseline",
@@ -73,7 +78,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "train",
@@ -85,7 +91,8 @@
      "l2"
     ],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "evaluate",
@@ -95,7 +102,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "gate",
@@ -108,7 +116,8 @@
      "min_auc_gain"
     ],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": false
    },
    {
     "name": "register",
@@ -119,7 +128,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": false
    },
    {
     "name": "new_month",
@@ -131,7 +141,8 @@
      "flaky_reads"
     ],
     "retries": 3,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "score",
@@ -141,7 +152,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    },
    {
     "name": "monitor",
@@ -152,7 +164,8 @@
     ],
     "params": [],
     "retries": 0,
-    "timeout": null
+    "timeout": null,
+    "cache": true
    }
   ],
   "workers": 8,
@@ -160,26 +173,26 @@
  },
  {
   "seq": 2,
-  "ts": 1790860756.8235,
+  "ts": 1790863435.8674,
   "type": "step_cached",
   "step": "customers",
-  "cache_key": "842e40824d3a2dd1a4ab349371955133da730812fb772afd035d90e8cc4d4d44",
+  "cache_key": "c4d7f05ca6febf65a3e6caf110e06891e9670e3b6eba93f25db4735e7caf4991",
   "artifact": "e5a3123cd73617e096d247f5e3404c1565ac482bfcd40f2146ef126d6edf20eb",
   "kind": "table",
   "size": 402536,
-  "source_run": "20261001-151916-1b25",
+  "source_run": "20261001-160355-7285",
   "metrics": {}
  },
  {
   "seq": 3,
-  "ts": 1790860756.8236,
+  "ts": 1790863435.8676,
   "type": "step_cached",
   "step": "validate",
-  "cache_key": "4268b6ca29172273632df26ee392e9d5a9ed69663201d114c67cbf86467fa218",
+  "cache_key": "44d4998ce862a878efb09744a40c9369f312ac6ce3f6bf0b4d5cdc08bda43b50",
   "artifact": "435b74224e2cc779679d4dfa4724e3e2325780ab4d174931a48e77d6fd7e5998",
   "kind": "table",
   "size": 401283,
-  "source_run": "20261001-151916-1b25",
+  "source_run": "20261001-160355-7285",
   "metrics": {
    "rows": 24000.0,
    "duplicates_dropped": 76.0
@@ -187,14 +200,14 @@
  },
  {
   "seq": 4,
-  "ts": 1790860756.8238,
+  "ts": 1790863435.8677,
   "type": "step_cached",
   "step": "split",
-  "cache_key": "4a438579271b4ea22c2ad0e754e85b4b533b9a593cec63b305f868b754b1013f",
+  "cache_key": "8907a44c0ea324c7785fe05a8ed11736d5ccb3108e839de52a60f65aff7daf39",
   "artifact": "a9bd18a0097534c27b770e73cea227d84aa4a24715a7c6696db621c53c17de50",
   "kind": "table",
   "size": 404929,
-  "source_run": "20261001-151916-1b25",
+  "source_run": "20261001-160355-7285",
   "metrics": {
    "train_rows": 19942.0,
    "test_rows": 4058.0,
@@ -204,50 +217,50 @@
  },
  {
   "seq": 5,
-  "ts": 1790860756.8239,
+  "ts": 1790863435.8679,
   "type": "step_cached",
   "step": "encoder",
-  "cache_key": "1fbfdb6af31ed254616b7469950e67225bee291ddeb8217819ecc194efa9cb4f",
+  "cache_key": "3aead4bbbae31faaf527ebbe9f9778c5dd444d5ff8740614cd38b59ca2347fad",
   "artifact": "f0ac4ed2f16267a406fb338e46a091187e019e9867053296bd2c55a2af7de8ba",
   "kind": "pickle",
   "size": 905,
-  "source_run": "20261001-151916-1b25",
+  "source_run": "20261001-160355-7285",
   "metrics": {}
  },
  {
   "seq": 6,
-  "ts": 1790860756.8241,
+  "ts": 1790863435.8681,
   "type": "step_cached",
   "step": "features",
-  "cache_key": "d561c6e1b9bf698924324f13ec770ae4493b795c0411d2676b86d8a18ccdbd61",
+  "cache_key": "8cb561bb356b5a5eeb801af3f5a9d5489a3f38be5ce34e534c5d90f3372567a4",
   "artifact": "b994f665e31b5e868766c244adc68c53ec8c38737eab36ac14216a9f6ac6fd81",
   "kind": "table",
   "size": 715865,
-  "source_run": "20261001-151916-1b25",
+  "source_run": "20261001-160355-7285",
   "metrics": {}
  },
  {
   "seq": 7,
-  "ts": 1790860756.8242,
+  "ts": 1790863435.8682,
   "type": "step_cached",
   "step": "baseline",
-  "cache_key": "566b2ca434b6fc9be308008fade3f610b5fd59c13082823f4f7628c81ebd1255",
+  "cache_key": "82272a2e70ada3a8241a2da4eb1b8859777189190dafaf359048f3f222bbf5f8",
   "artifact": "28cf44acd1fa47a1bea0800bd7e08d4cf6407ee863a41fde4fa739139a2c7baf",
   "kind": "json",
   "size": 3362,
-  "source_run": "20261001-151916-1b25",
+  "source_run": "20261001-160355-7285",
   "metrics": {}
  },
  {
   "seq": 8,
-  "ts": 1790860756.8243,
+  "ts": 1790863435.8684,
   "type": "step_cached",
   "step": "train",
-  "cache_key": "7bb5797a86e4258bb104ec13f950fad2a25d966abf0632523d9cf2254395d65f",
+  "cache_key": "bcc8cde9effa53ef20938f7c387342c25d9a963b399a5d0509b14226de2c5a6d",
   "artifact": "7e9408883063938d994adb91c16e2fe21dc37e34e5ea7cbc84f9557fbd90fa66",
   "kind": "pickle",
   "size": 1209,
-  "source_run": "20261001-151916-1b25",
+  "source_run": "20261001-160355-7285",
   "metrics": {
    "newton_iterations": 7.0,
    "train_loss": 0.3340022598486306
@@ -255,70 +268,98 @@
  },
  {
   "seq": 9,
-  "ts": 1790860756.8245,
+  "ts": 1790863435.8686,
   "type": "step_cached",
   "step": "evaluate",
-  "cache_key": "16e40eaa41360d28d43d6388cdcf7f8c442d9fd53516488e89af32846c2700a8",
-  "artifact": "e1f8fbdbff24a391bfdbb6870ee29cb8da1ff5a8d5d5de19bc238015a1b6fc32",
+  "cache_key": "cd44c10112a46e37e7e3822e0506bb72633b8b9bc4b0b2b7509d4e3b536cd6ab",
+  "artifact": "278a0dd500a46e747573cd47a6ac3e962f8ceb1f38c546601ecffb6da1215c11",
   "kind": "json",
   "size": 1538,
-  "source_run": "20261001-151916-1b25",
+  "source_run": "20261001-160355-7285",
   "metrics": {
    "roc_auc": 0.7984636920848568,
    "pr_auc": 0.4503070126755882,
    "log_loss": 0.36768347416895375,
    "brier": 0.11473743533623554,
-   "ece": 0.029852932479053716,
+   "ece": 0.029831728536892633,
    "lift_top_decile": 3.1870520043656527,
    "base_rate": 0.1646131099063578
   }
  },
  {
   "seq": 10,
-  "ts": 1790860756.8247,
+  "ts": 1790863435.8687,
   "type": "step_cached",
-  "step": "gate",
-  "cache_key": "1d53539e3abe575bae7b8dee136eade466e3ac7aa70cfa9b42784b28d498d2fc",
-  "artifact": "19672c476f5992031188df3c5c082ef7d124a0e7b0fbc41007dbccab4391fbe3",
-  "kind": "json",
-  "size": 109,
-  "source_run": "20261001-151916-1b25",
+  "step": "new_month",
+  "cache_key": "00bd64f6892d1cd4aad838ba61e3c2174cc5e5fbeb4cf1c24a812237c1c1e43e",
+  "artifact": "92143de9cd160687a9786094d0952df1468ebffcdd8cd1ddd2dccce4f6cf9e45",
+  "kind": "table",
+  "size": 35761,
+  "source_run": "20261001-160355-7285",
   "metrics": {}
  },
  {
   "seq": 11,
-  "ts": 1790860756.8248,
-  "type": "step_cached",
-  "step": "register",
-  "cache_key": "6773d3e2281aaf23a354be22db9cc56e1ac542ce706d59c3058121a59ecfb156",
-  "artifact": "7e9e6bd22c9339e8afdd3610ed40a452f887b9a892d94f5e1522c7f20098e6fa",
-  "kind": "json",
-  "size": 71,
-  "source_run": "20261001-151916-1b25",
-  "metrics": {}
+  "ts": 1790863435.8728,
+  "type": "step_started",
+  "step": "gate",
+  "attempt": 1
  },
  {
   "seq": 12,
-  "ts": 1790860756.8249,
-  "type": "step_cached",
-  "step": "new_month",
-  "cache_key": "5202021161c2aa63345ef4bb9dddcddeeb1ad229b7d1c46b0842427d4ab2f34c",
-  "artifact": "92143de9cd160687a9786094d0952df1468ebffcdd8cd1ddd2dccce4f6cf9e45",
-  "kind": "table",
-  "size": 35761,
-  "source_run": "20261001-151916-1b25",
-  "metrics": {}
+  "ts": 1790863435.8731,
+  "type": "log",
+  "step": "gate",
+  "message": "already the champion"
  },
  {
   "seq": 13,
-  "ts": 1790860756.8251,
+  "ts": 1790863435.8739,
+  "type": "step_succeeded",
+  "step": "gate",
+  "attempts": 1,
+  "duration": 0.0046,
+  "cache_key": "cd35b2faa749853ce08621a2c579328bb552065d280d42caebd67e5268816274",
+  "artifact": "08e24dee531521f0542b1712c66e066392ab2f4b298bc32b809a2acbdcf12a76",
+  "kind": "json",
+  "size": 131
+ },
+ {
+  "seq": 14,
+  "ts": 1790863435.874,
+  "type": "step_started",
+  "step": "register",
+  "attempt": 1
+ },
+ {
+  "seq": 15,
+  "ts": 1790863435.8747,
+  "type": "log",
+  "step": "register",
+  "message": "registered churn:1, champion is v1"
+ },
+ {
+  "seq": 16,
+  "ts": 1790863435.8751,
+  "type": "step_succeeded",
+  "step": "register",
+  "attempts": 1,
+  "duration": 0.0008,
+  "cache_key": "45232a059dad3d68d4171b2bf4f1c32eb02e95c1517df9322723c697c8401bd0",
+  "artifact": "34849e8fc1f8105c44838ddb697ea76b75ce3d3992f620ad435d4b521a06dc90",
+  "kind": "json",
+  "size": 52
+ },
+ {
+  "seq": 17,
+  "ts": 1790863435.8753,
   "type": "step_cached",
   "step": "score",
-  "cache_key": "3a6f7c4256e7ec488b41d1096d5215f5819b94345d0cddd299dd67364b1781c2",
+  "cache_key": "dead87a736aca749d72487a759921a6e3c4456067da2000dcc0a3dfe0eaeafe8",
   "artifact": "736d23c1795ce377ffc45da2f7f66b7bfd2a8037e6d6c5fb497182899d505fba",
   "kind": "table",
   "size": 20147,
-  "source_run": "20261001-151916-1b25",
+  "source_run": "20261001-160355-7285",
   "metrics": {
    "scored": 2007.0,
    "mean_score": 0.14507000561936712,
@@ -326,29 +367,29 @@
   }
  },
  {
-  "seq": 14,
-  "ts": 1790860756.8252,
+  "seq": 18,
+  "ts": 1790863435.8755,
   "type": "step_cached",
   "step": "monitor",
-  "cache_key": "1175497edbb881df93eda39c28ad908c07e902aee6d61bac39dc239262ac20c0",
+  "cache_key": "4b0c5eba6c517e1ccbf680cf5383b4e5fbc40da5a7ae0c115abfad161d837251",
   "artifact": "943970b3f520411b26ee3564a10251c717075a22204d6c498515e245f68d0506",
   "kind": "json",
   "size": 911,
-  "source_run": "20261001-151916-1b25",
+  "source_run": "20261001-160355-7285",
   "metrics": {
    "psi_max": 0.44073,
    "features_drifting": 1.0
   }
  },
  {
-  "seq": 15,
-  "ts": 1790860756.8253,
+  "seq": 19,
+  "ts": 1790863435.8757,
   "type": "run_finished",
   "status": "succeeded",
-  "duration": 0.0021,
+  "duration": 0.0085,
   "counts": {
-   "succeeded": 0,
-   "cached": 13,
+   "succeeded": 2,
+   "cached": 11,
    "failed": 0,
    "skipped": 0
   }
