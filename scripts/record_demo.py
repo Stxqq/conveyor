@@ -9,6 +9,8 @@ docs/runs/artifacts/, standing in for /api/artifacts/<id>/value.
 from __future__ import annotations
 
 import json
+import os
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -21,7 +23,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 SCENARIOS = [
     ("cold", "First run on an empty workspace", {}),
-    ("cached", "Same code, same params: every step is a cache hit", {}),
+    ("cached", "Same code and params: only the registry steps run", {}),
     (
         "param-change",
         "Stronger regularisation; the gate keeps the champion",
@@ -33,21 +35,25 @@ SCENARIOS = [
 
 
 def main() -> None:
-    pipeline = load_pipeline(ROOT / "examples" / "churn" / "pipeline.py")
-    out = ROOT / "docs" / "runs"
-    values = out / "artifacts"
-    values.mkdir(parents=True, exist_ok=True)
+    # tracebacks show paths relative to the working directory; from anywhere
+    # else they'd carry this machine's home directory into the public demo
+    os.chdir(ROOT)
+    pipeline = load_pipeline("examples/churn/pipeline.py")
+    runs_dir = ROOT / "docs" / "runs"
+    artifacts_dir = runs_dir / "artifacts"
+    shutil.rmtree(artifacts_dir, ignore_errors=True)
+    artifacts_dir.mkdir(parents=True)
     index = []
     with tempfile.TemporaryDirectory() as tmp:
         ex = Executor(Path(tmp) / ".conveyor")
         for slug, title, params in SCENARIOS:
             result = ex.run(pipeline, params, source="examples/churn/pipeline.py")
             events = read_events(result.events_path)
-            (out / f"{slug}.json").write_text(json.dumps(events, indent=1) + "\n")
+            (runs_dir / f"{slug}.json").write_text(json.dumps(events, indent=1) + "\n")
             for event in events:
                 if event.get("kind") == "json":
                     value = ex.store.get(event["artifact"], "json")
-                    target = values / f"{event['artifact']}.json"
+                    target = artifacts_dir / f"{event['artifact']}.json"
                     target.write_text(json.dumps(value, indent=1) + "\n")
             index.append(
                 {
@@ -78,8 +84,10 @@ def main() -> None:
             for name in registry.names()
         ]
         ex.lineage.close()
-    (out / "index.json").write_text(json.dumps(index, indent=1) + "\n")
-    (out / "models.json").write_text(json.dumps(models, indent=1, default=str) + "\n")
+    (runs_dir / "index.json").write_text(json.dumps(index, indent=1) + "\n")
+    (runs_dir / "models.json").write_text(
+        json.dumps(models, indent=1, default=str) + "\n"
+    )
 
 
 if __name__ == "__main__":
