@@ -1,4 +1,3 @@
-export const EASE = "cubic-bezier(.32,.72,0,1)";
 export const FOLLOW = 0.085;
 export const FRICTION = 0.94;
 

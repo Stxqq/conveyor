@@ -70,7 +70,7 @@ export class ModelView {
     }
 
     const html = card
-      ? modelCard(card, champion, gate, drift, note)
+      ? modelCard(card, champion, gate, drift, note, finished)
       : `<div class="model-wait"><span class="spec">Model card</span><p>Appears once the run registers a model.</p></div>`;
     if (html === this.#html) return;
     this.#html = html;
@@ -83,7 +83,7 @@ export class ModelView {
   }
 }
 
-function modelCard(card, champion, gate, drift, note) {
+function modelCard(card, champion, gate, drift, note, finished) {
   const isChampion = champion && champion.version === card.version;
   const status = isChampion
     ? '<span class="chip chip-dark">champion</span>'
@@ -104,7 +104,7 @@ function modelCard(card, champion, gate, drift, note) {
   }).join("");
 
   const decision = gate
-    ? `<p class="gate-line"><span class="spec">Gate</span>${escape(gate.reason)}. ${
+    ? `<p class="gate-line"><span class="spec">Gate</span>${escape(gate.reason[0].toUpperCase() + gate.reason.slice(1))}. ${
         gate.promote ? `v${card.version} is promoted.` : `v${gate.champion ?? champion?.version} stays champion.`
       }</p>`
     : "";
@@ -128,7 +128,7 @@ function modelCard(card, champion, gate, drift, note) {
           <figcaption><b>Calibration</b><span>Observed churn rate per predicted-risk bin on the test months. Dots sized by rows.</span></figcaption>
         </figure>
         <figure class="fig">
-          ${drift ? psi(drift) : '<div class="psi-wait">Drift report appears once monitor runs.</div>'}
+          ${drift ? psi(drift) : `<div class="psi-wait">${finished ? "Monitor didn't run in this replay." : "Appears once monitor runs."}</div>`}
           <figcaption><b>Drift</b><span>Population stability of each feature in the month being scored, against the training months.</span></figcaption>
         </figure>
       </div>

@@ -116,6 +116,8 @@ function tickWhileLive() {
 
 async function finishLive() {
   state.closeStream = null;
+  // the stream can also end without run_finished, when the run's process died
+  player.live = false;
   await refreshRuns();
   views.model.setModels(await source.models());
   render();
