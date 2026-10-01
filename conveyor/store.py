@@ -137,4 +137,11 @@ def _dump(value: Any, kind: str, fh: Any) -> None:
     elif kind == "json":
         fh.write(json.dumps(value, indent=1).encode())
     else:
-        pickle.dump(value, fh, protocol=5)
+        # Older Pythons raise a bare AttributeError for lambdas and local
+        # classes; say what actually went wrong.
+        try:
+            pickle.dump(value, fh, protocol=5)
+        except (pickle.PicklingError, AttributeError, TypeError) as exc:
+            raise pickle.PicklingError(
+                f"can't pickle {type(value).__name__}: {exc}"
+            ) from exc
