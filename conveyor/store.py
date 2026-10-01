@@ -27,6 +27,7 @@ def _plain_array(value: Any) -> bool:
 
 def _is_table(value: Any) -> bool:
     """A dict of arrays, or of such dicts (``{"train": {...}, "test": {...}}``)."""
+    # "/" is the separator _flatten uses for npz keys
     return (
         isinstance(value, dict)
         and bool(value)

@@ -210,6 +210,7 @@ class Lineage:
             rows = self._rows(
                 "SELECT id FROM runs WHERE id = ? OR id LIKE ?"
                 " ORDER BY started_at DESC",
+                # a literal % would otherwise act as a LIKE wildcard
                 (ref, ref.replace("%", "") + "%"),
             )
             if len(rows) > 1 and rows[0]["id"] != ref:

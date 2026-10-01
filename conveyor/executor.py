@@ -106,6 +106,8 @@ class Executor:
         self.workspace = Path(workspace)
         self.store = ArtifactStore(self.workspace)
         self.lineage = Lineage(self.workspace / "conveyor.db")
+        # Steps are mostly numpy, which releases the GIL; more threads than
+        # that mostly just hold more intermediate arrays in memory at once.
         self.max_workers = max_workers or min(8, os.cpu_count() or 4)
         self.cache = cache
         self.listeners = list(listeners or [])
@@ -460,7 +462,7 @@ def _call(step: Step, kwargs: dict[str, Any], ctx: StepContext) -> Any:
 def _trim_traceback(exc: BaseException) -> str:
     # Drop the executor's own frames; the user wants to see their step.
     frames = traceback.extract_tb(exc.__traceback__)
-    here = os.path.dirname(__file__)
+    here = os.path.dirname(os.path.abspath(__file__)) + os.sep
     frames = [f for f in frames if not f.filename.startswith(here)]
     cwd = os.getcwd() + os.sep
     for f in frames:
