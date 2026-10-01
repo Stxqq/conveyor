@@ -65,7 +65,7 @@ code { font-family: var(--mono); font-size: .86em; }
 .pill {
   position: fixed; top: 28px; left: 50%; z-index: 50;
   transform: translateX(-50%);
-  display: flex;
+  display: flex; gap: 6px;
   padding: 7px;
   background: var(--pill);
   border-radius: 999px;
@@ -74,7 +74,7 @@ code { font-family: var(--mono); font-size: .86em; }
 }
 .pill-ind {
   position: absolute; left: 7px; top: 7px;
-  width: 84px; height: 44px;
+  width: 84px; height: 50px;
   border-radius: 999px;
   background: #fff;
   box-shadow: var(--lift-shadow);
@@ -82,20 +82,20 @@ code { font-family: var(--mono); font-size: .86em; }
 }
 .pill-btn {
   position: relative; z-index: 1;
-  width: 84px; height: 44px;
+  width: 84px; height: 50px;
   display: grid; place-items: center;
   border-radius: 999px;
   font-size: 13.5px; font-weight: 600;
-  color: #a6a6ad; text-decoration: none;
-  transition: color .3s;
+  color: #b4b4bb; text-decoration: none;
+  transition: color .3s var(--ease);
 }
-.pill-btn:hover { color: #6b6b73; }
+.pill-btn:hover { color: #97979e; }
 .pill-btn.active { color: var(--ink); }
 
-/* ————— page ————— */
+/* page */
 #page {
   padding-bottom: 60px;
-  transition: filter .45s var(--ease), opacity .45s;
+  transition: filter .45s var(--ease), opacity .45s var(--ease);
 }
 .intro {
   max-width: 420px;
@@ -136,7 +136,14 @@ code { font-family: var(--mono); font-size: .86em; }
   box-shadow: var(--card-shadow);
 }
 
-.caption { margin: 18px auto 0; }
+.caption {
+  margin: 18px auto 0;
+  transition: opacity .45s var(--ease), transform .45s var(--ease);
+}
+#stage.is-switching .caption {
+  opacity: 0; transform: translateY(-10px);
+  transition-duration: .3s;
+}
 .caption h2 { font-size: 16.5px; font-weight: 600; }
 .caption p { color: var(--gray); font-size: 15px; margin-top: 2px; min-height: 1.6em; }
 
@@ -862,9 +869,10 @@ body.sheet-open .sheet-close { opacity: 1; transform: none; }
   .intro { padding: 132px 24px 48px; }
   .stage { width: calc(100% - 32px); }
   .pill-ind, .pill-btn { width: 74px; }
+  .graph-viewport { height: 283px; }
   .pill-btn { font-size: 13px; }
   .graph-tile { padding: 44px 0; }
-  .timeline-tile, .runs-tile { padding: 12px; }
+  .timeline-tile, .runs-tile { padding: 18px; }
   .timeline-card { --name: 84px; padding: 22px 16px 16px; }
   .tl-name { font-size: 11.5px; }
   .tl-legend { margin-left: 0; }

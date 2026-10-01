@@ -136,21 +136,30 @@ function show(view) {
   if (view === state.view) return;
   const previous = state.view && section(state.view);
   state.view = view;
-  $("#stage").dataset.view = view;
   for (const link of document.querySelectorAll(".pill-btn")) {
     const active = link.dataset.view === view;
     link.classList.toggle("active", active);
     link.toggleAttribute("aria-current", active);
   }
-  $(".pill-ind").style.transform = `translateX(${VIEWS.indexOf(view) * 100}%)`;
+  placePill();
+  const stage = $("#stage");
   const next = section(view);
   const enter = () => {
+    // the caption's width follows the view, so it only changes once the old
+    // view is gone
+    stage.dataset.view = view;
     next.hidden = false;
     next.classList.add("entering");
     render();
-    requestAnimationFrame(() => requestAnimationFrame(() => next.classList.remove("entering")));
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        next.classList.remove("entering");
+        stage.classList.remove("is-switching");
+      }),
+    );
   };
   if (!previous) return enter();
+  stage.classList.add("is-switching");
   previous.classList.add("leaving");
   setTimeout(() => {
     previous.hidden = true;
@@ -158,6 +167,12 @@ function show(view) {
     if (state.view === view) enter();
   }, 280);
 }
+
+function placePill() {
+  const step = (narrow.matches ? PILL.narrow : PILL.width) + PILL.gap;
+  $(".pill-ind").style.transform = `translateX(${VIEWS.indexOf(state.view) * step}px)`;
+}
+narrow.addEventListener("change", placePill);
 
 function bindTransport() {
   const root = $("#transport");
