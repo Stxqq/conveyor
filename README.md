@@ -235,11 +235,11 @@ Inspecting what happened:
 
 ```
 $ conveyor runs
-20261001-162001-e257  churn      succeeded     481 ms  3 ran  10 cached
-20261001-162001-f5e5  churn      failed        105 ms  1 ran  1 cached  1 failed  10 skipped
-20261001-161955-55ca  churn      succeeded      59 ms  5 ran  8 cached
-20261001-161955-1076  churn      succeeded      40 ms  2 ran  11 cached
-20261001-161954-463d  churn      succeeded     372 ms  13 ran  0 cached
+20261001-162001-e257  churn      succeeded     481 ms  3 ran  10 cached                        just now
+20261001-162001-f5e5  churn      failed        105 ms  1 ran  1 cached  1 failed  10 skipped   just now
+20261001-161955-55ca  churn      succeeded      59 ms  5 ran  8 cached                         just now
+20261001-161955-1076  churn      succeeded      40 ms  2 ran  11 cached                        just now
+20261001-161954-463d  churn      succeeded     372 ms  13 ran  0 cached                        just now
 
 $ conveyor models
 churn
