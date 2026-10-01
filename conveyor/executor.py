@@ -454,6 +454,10 @@ def _trim_traceback(exc: BaseException) -> str:
     frames = traceback.extract_tb(exc.__traceback__)
     here = os.path.dirname(__file__)
     frames = [f for f in frames if not f.filename.startswith(here)]
+    cwd = os.getcwd() + os.sep
+    for f in frames:
+        if f.filename.startswith(cwd):
+            f.filename = f.filename[len(cwd) :]
     lines = traceback.format_list(frames)
     lines += traceback.format_exception_only(type(exc), exc)
     return "".join(lines).rstrip()
