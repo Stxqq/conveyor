@@ -150,9 +150,16 @@ export class GraphView {
 
   #send(edge) {
     if (still() || document.hidden) return;
-    const dot = svg("circle", { r: 2.6, class: "packet" });
-    this.edgeLayer.append(dot);
     const length = edge.path.getTotalLength();
+    const start = edge.path.getPointAtLength(0);
+    // start hidden on the path, or it shows at the canvas origin until the first frame
+    const dot = svg("circle", {
+      r: 2.6,
+      class: "packet",
+      transform: `translate(${start.x} ${start.y})`,
+      opacity: 0,
+    });
+    this.edgeLayer.append(dot);
     let t = 0;
     animate((dt) => {
       t += dt / PACKET_MS;
