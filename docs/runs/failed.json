@@ -1,0 +1,298 @@
+[
+ {
+  "seq": 1,
+  "ts": 1790860046.4019,
+  "type": "run_started",
+  "run_id": "20261001-150726-2651",
+  "pipeline": "churn",
+  "params": {
+   "seed": 7,
+   "n_customers": 24000,
+   "corrupt": 0.03,
+   "test_months": 2,
+   "l2": 1.0,
+   "min_auc_gain": 0.002,
+   "price_increase": 0.12,
+   "flaky_reads": 0
+  },
+  "graph": [
+   {
+    "name": "customers",
+    "inputs": [],
+    "params": [
+     "seed",
+     "n_customers",
+     "corrupt"
+    ],
+    "retries": 0,
+    "timeout": null
+   },
+   {
+    "name": "validate",
+    "inputs": [
+     "customers"
+    ],
+    "params": [],
+    "retries": 0,
+    "timeout": null
+   },
+   {
+    "name": "split",
+    "inputs": [
+     "validate"
+    ],
+    "params": [
+     "test_months"
+    ],
+    "retries": 0,
+    "timeout": null
+   },
+   {
+    "name": "encoder",
+    "inputs": [
+     "split"
+    ],
+    "params": [],
+    "retries": 0,
+    "timeout": null
+   },
+   {
+    "name": "features",
+    "inputs": [
+     "split",
+     "encoder"
+    ],
+    "params": [],
+    "retries": 0,
+    "timeout": null
+   },
+   {
+    "name": "baseline",
+    "inputs": [
+     "split"
+    ],
+    "params": [],
+    "retries": 0,
+    "timeout": null
+   },
+   {
+    "name": "train",
+    "inputs": [
+     "features",
+     "encoder"
+    ],
+    "params": [
+     "l2"
+    ],
+    "retries": 0,
+    "timeout": null
+   },
+   {
+    "name": "evaluate",
+    "inputs": [
+     "train",
+     "split"
+    ],
+    "params": [],
+    "retries": 0,
+    "timeout": null
+   },
+   {
+    "name": "gate",
+    "inputs": [
+     "train",
+     "evaluate",
+     "split"
+    ],
+    "params": [
+     "min_auc_gain"
+    ],
+    "retries": 0,
+    "timeout": null
+   },
+   {
+    "name": "register",
+    "inputs": [
+     "train",
+     "evaluate",
+     "gate"
+    ],
+    "params": [],
+    "retries": 0,
+    "timeout": null
+   },
+   {
+    "name": "new_month",
+    "inputs": [],
+    "params": [
+     "seed",
+     "n_customers",
+     "price_increase",
+     "flaky_reads"
+    ],
+    "retries": 3,
+    "timeout": null
+   },
+   {
+    "name": "score",
+    "inputs": [
+     "register",
+     "new_month"
+    ],
+    "params": [],
+    "retries": 0,
+    "timeout": null
+   },
+   {
+    "name": "monitor",
+    "inputs": [
+     "baseline",
+     "new_month",
+     "score"
+    ],
+    "params": [],
+    "retries": 0,
+    "timeout": null
+   }
+  ],
+  "workers": 8,
+  "cache": true
+ },
+ {
+  "seq": 2,
+  "ts": 1790860046.4021,
+  "type": "step_cached",
+  "step": "new_month",
+  "cache_key": "5202021161c2aa63345ef4bb9dddcddeeb1ad229b7d1c46b0842427d4ab2f34c",
+  "artifact": "92143de9cd160687a9786094d0952df1468ebffcdd8cd1ddd2dccce4f6cf9e45",
+  "kind": "table",
+  "size": 35761,
+  "source_run": "20261001-150725-e1f1",
+  "metrics": {}
+ },
+ {
+  "seq": 3,
+  "ts": 1790860046.4022,
+  "type": "step_started",
+  "step": "customers",
+  "attempt": 1
+ },
+ {
+  "seq": 4,
+  "ts": 1790860046.4954,
+  "type": "step_succeeded",
+  "step": "customers",
+  "attempts": 1,
+  "duration": 0.0928,
+  "cache_key": "956c3f5f4c6150feebd1caa72c04c2676a39cc5e4e3ed311b1fa7b1e9e868cc5",
+  "artifact": "dd185533705f24a485e3713448df92ef611c2e6d4ca9b4d2e07f530a6229f2ca",
+  "kind": "table",
+  "size": 404513
+ },
+ {
+  "seq": 5,
+  "ts": 1790860046.4955,
+  "type": "step_started",
+  "step": "validate",
+  "attempt": 1
+ },
+ {
+  "seq": 6,
+  "ts": 1790860046.4975,
+  "type": "step_traceback",
+  "step": "validate",
+  "traceback": "  File \"examples/churn/pipeline.py\", line 37, in validate\n    raise ValidationError(\nchurn.pipeline.ValidationError: 3 checks failed on 24076 rows\ntenure_months           225 rows below 0 (lowest -73)\nage                     315 rows above 100 (highest 314.5)\ncontract                171 rows not in levels: 'montly'"
+ },
+ {
+  "seq": 7,
+  "ts": 1790860046.4976,
+  "type": "step_failed",
+  "step": "validate",
+  "attempts": 1,
+  "duration": 0.0018,
+  "error": "churn.pipeline.ValidationError: 3 checks failed on 24076 rows\ntenure_months           225 rows below 0 (lowest -73)\nage                     315 rows above 100 (highest 314.5)\ncontract                171 rows not in levels: 'montly'"
+ },
+ {
+  "seq": 8,
+  "ts": 1790860046.4977,
+  "type": "step_skipped",
+  "step": "split",
+  "because": "validate"
+ },
+ {
+  "seq": 9,
+  "ts": 1790860046.4978,
+  "type": "step_skipped",
+  "step": "encoder",
+  "because": "validate"
+ },
+ {
+  "seq": 10,
+  "ts": 1790860046.4979,
+  "type": "step_skipped",
+  "step": "features",
+  "because": "validate"
+ },
+ {
+  "seq": 11,
+  "ts": 1790860046.498,
+  "type": "step_skipped",
+  "step": "baseline",
+  "because": "validate"
+ },
+ {
+  "seq": 12,
+  "ts": 1790860046.4981,
+  "type": "step_skipped",
+  "step": "train",
+  "because": "validate"
+ },
+ {
+  "seq": 13,
+  "ts": 1790860046.4981,
+  "type": "step_skipped",
+  "step": "evaluate",
+  "because": "validate"
+ },
+ {
+  "seq": 14,
+  "ts": 1790860046.4983,
+  "type": "step_skipped",
+  "step": "gate",
+  "because": "validate"
+ },
+ {
+  "seq": 15,
+  "ts": 1790860046.4984,
+  "type": "step_skipped",
+  "step": "register",
+  "because": "validate"
+ },
+ {
+  "seq": 16,
+  "ts": 1790860046.4984,
+  "type": "step_skipped",
+  "step": "score",
+  "because": "validate"
+ },
+ {
+  "seq": 17,
+  "ts": 1790860046.4985,
+  "type": "step_skipped",
+  "step": "monitor",
+  "because": "validate"
+ },
+ {
+  "seq": 18,
+  "ts": 1790860046.4988,
+  "type": "run_finished",
+  "status": "failed",
+  "duration": 0.0969,
+  "counts": {
+   "succeeded": 1,
+   "cached": 1,
+   "failed": 1,
+   "skipped": 10
+  }
+ }
+]

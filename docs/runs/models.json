@@ -1,0 +1,297 @@
+[
+ {
+  "name": "churn",
+  "champion": 1,
+  "versions": [
+   {
+    "name": "churn",
+    "version": 1,
+    "digest": "7e9408883063938d994adb91c16e2fe21dc37e34e5ea7cbc84f9557fbd90fa66",
+    "created_at": 1790860045.673318,
+    "class": "churn.model.ChurnModel",
+    "description": "Probability that a customer cancels within 30 days.",
+    "intended_use": "Ranking customers for retention offers; not for pricing.",
+    "algorithm": "L2 logistic regression, Newton's method",
+    "params": {
+     "l2": 1.0
+    },
+    "features": [
+     "tenure_months",
+     "age",
+     "monthly_charges",
+     "total_charges",
+     "sessions_30d",
+     "support_tickets_90d",
+     "late_payments_12m",
+     "age_missing",
+     "total_charges_missing",
+     "contract=annual",
+     "contract=monthly",
+     "contract=two_year",
+     "plan=basic",
+     "plan=premium",
+     "plan=standard",
+     "payment=card",
+     "payment=debit",
+     "payment=invoice",
+     "payment=wallet",
+     "region=central",
+     "region=east",
+     "region=north",
+     "region=south",
+     "region=west"
+    ],
+    "train_months": [
+     0,
+     9
+    ],
+    "test_months": [
+     10,
+     11
+    ],
+    "metrics": {
+     "roc_auc": 0.79846,
+     "pr_auc": 0.45031,
+     "log_loss": 0.36768,
+     "brier": 0.11474,
+     "ece": 0.02985,
+     "lift_top_decile": 3.18705
+    },
+    "calibration": [
+     {
+      "low": 0.0,
+      "high": 0.1,
+      "count": 2127,
+      "predicted": 0.0433,
+      "observed": 0.0508
+     },
+     {
+      "low": 0.1,
+      "high": 0.2,
+      "count": 967,
+      "predicted": 0.1453,
+      "observed": 0.1789
+     },
+     {
+      "low": 0.2,
+      "high": 0.3,
+      "count": 495,
+      "predicted": 0.2477,
+      "observed": 0.299
+     },
+     {
+      "low": 0.3,
+      "high": 0.4,
+      "count": 266,
+      "predicted": 0.3467,
+      "observed": 0.4887
+     },
+     {
+      "low": 0.4,
+      "high": 0.5,
+      "count": 123,
+      "predicted": 0.4422,
+      "observed": 0.439
+     },
+     {
+      "low": 0.5,
+      "high": 0.6,
+      "count": 56,
+      "predicted": 0.5451,
+      "observed": 0.625
+     },
+     {
+      "low": 0.6,
+      "high": 0.7,
+      "count": 22,
+      "predicted": 0.6321,
+      "observed": 0.8182
+     },
+     {
+      "low": 0.7,
+      "high": 0.8,
+      "count": 2,
+      "predicted": 0.7141,
+      "observed": 1.0
+     }
+    ],
+    "drivers": [
+     {
+      "feature": "contract=monthly",
+      "weight": 1.176
+     },
+     {
+      "feature": "contract=two_year",
+      "weight": -1.0666
+     },
+     {
+      "feature": "tenure_months",
+      "weight": -0.6517
+     },
+     {
+      "feature": "sessions_30d",
+      "weight": -0.337
+     },
+     {
+      "feature": "age_missing",
+      "weight": 0.306
+     },
+     {
+      "feature": "monthly_charges",
+      "weight": 0.2853
+     }
+    ],
+    "gate": {
+     "challenger_auc": 0.7984636920848568,
+     "min_gain": 0.002,
+     "promote": true,
+     "reason": "no champion yet"
+    },
+    "run_id": "20261001-150725-e1f1",
+    "caveats": [
+     "Trained on synthetic data.",
+     "Scores drift with pricing changes; watch the monitor step."
+    ]
+   },
+   {
+    "name": "churn",
+    "version": 2,
+    "digest": "9a041b71aa90da3e8923ba62822ac49e1335dddf23d98f34c706039b98b695ea",
+    "created_at": 1790860045.709425,
+    "class": "churn.model.ChurnModel",
+    "description": "Probability that a customer cancels within 30 days.",
+    "intended_use": "Ranking customers for retention offers; not for pricing.",
+    "algorithm": "L2 logistic regression, Newton's method",
+    "params": {
+     "l2": 1000.0
+    },
+    "features": [
+     "tenure_months",
+     "age",
+     "monthly_charges",
+     "total_charges",
+     "sessions_30d",
+     "support_tickets_90d",
+     "late_payments_12m",
+     "age_missing",
+     "total_charges_missing",
+     "contract=annual",
+     "contract=monthly",
+     "contract=two_year",
+     "plan=basic",
+     "plan=premium",
+     "plan=standard",
+     "payment=card",
+     "payment=debit",
+     "payment=invoice",
+     "payment=wallet",
+     "region=central",
+     "region=east",
+     "region=north",
+     "region=south",
+     "region=west"
+    ],
+    "train_months": [
+     0,
+     9
+    ],
+    "test_months": [
+     10,
+     11
+    ],
+    "metrics": {
+     "roc_auc": 0.78672,
+     "pr_auc": 0.44049,
+     "log_loss": 0.38779,
+     "brier": 0.1212,
+     "ece": 0.04882,
+     "lift_top_decile": 3.1272
+    },
+    "calibration": [
+     {
+      "low": 0.0,
+      "high": 0.1,
+      "count": 1563,
+      "predicted": 0.0688,
+      "observed": 0.0429
+     },
+     {
+      "low": 0.1,
+      "high": 0.2,
+      "count": 1766,
+      "predicted": 0.1418,
+      "observed": 0.1574
+     },
+     {
+      "low": 0.2,
+      "high": 0.3,
+      "count": 576,
+      "predicted": 0.2409,
+      "observed": 0.3958
+     },
+     {
+      "low": 0.3,
+      "high": 0.4,
+      "count": 126,
+      "predicted": 0.3373,
+      "observed": 0.5794
+     },
+     {
+      "low": 0.4,
+      "high": 0.5,
+      "count": 26,
+      "predicted": 0.4282,
+      "observed": 0.8077
+     },
+     {
+      "low": 0.5,
+      "high": 0.6,
+      "count": 1,
+      "predicted": 0.5196,
+      "observed": 1.0
+     }
+    ],
+    "drivers": [
+     {
+      "feature": "contract=monthly",
+      "weight": 0.3999
+     },
+     {
+      "feature": "tenure_months",
+      "weight": -0.3042
+     },
+     {
+      "feature": "monthly_charges",
+      "weight": 0.2979
+     },
+     {
+      "feature": "contract=two_year",
+      "weight": -0.2288
+     },
+     {
+      "feature": "sessions_30d",
+      "weight": -0.2129
+     },
+     {
+      "feature": "contract=annual",
+      "weight": -0.1711
+     }
+    ],
+    "gate": {
+     "challenger_auc": 0.7867150654443326,
+     "min_gain": 0.002,
+     "champion": 1,
+     "champion_auc": 0.7984636920848568,
+     "gain": -0.011748626640524229,
+     "promote": false,
+     "reason": "AUC -0.0117 vs v1, below the 0.002 bar"
+    },
+    "run_id": "20261001-150725-2810",
+    "caveats": [
+     "Trained on synthetic data.",
+     "Scores drift with pricing changes; watch the monitor step."
+    ]
+   }
+  ]
+ }
+]

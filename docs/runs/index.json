@@ -1,0 +1,78 @@
+[
+ {
+  "file": "cold.json",
+  "title": "First run on an empty workspace",
+  "params": {},
+  "run_id": "20261001-150725-e1f1",
+  "status": "succeeded",
+  "duration": 0.3331,
+  "counts": {
+   "succeeded": 13,
+   "cached": 0,
+   "failed": 0,
+   "skipped": 0
+  }
+ },
+ {
+  "file": "cached.json",
+  "title": "Same code, same params: every step is a cache hit",
+  "params": {},
+  "run_id": "20261001-150725-249b",
+  "status": "succeeded",
+  "duration": 0.003,
+  "counts": {
+   "succeeded": 0,
+   "cached": 13,
+   "failed": 0,
+   "skipped": 0
+  }
+ },
+ {
+  "file": "param-change.json",
+  "title": "Stronger regularisation; the gate keeps the champion",
+  "params": {
+   "l2": 1000.0
+  },
+  "run_id": "20261001-150725-2810",
+  "status": "succeeded",
+  "duration": 0.0283,
+  "counts": {
+   "succeeded": 5,
+   "cached": 8,
+   "failed": 0,
+   "skipped": 0
+  }
+ },
+ {
+  "file": "retry.json",
+  "title": "The warehouse read times out twice before it works",
+  "params": {
+   "flaky_reads": 2
+  },
+  "run_id": "20261001-150725-ee7e",
+  "status": "succeeded",
+  "duration": 0.6852,
+  "counts": {
+   "succeeded": 1,
+   "cached": 12,
+   "failed": 0,
+   "skipped": 0
+  }
+ },
+ {
+  "file": "failed.json",
+  "title": "A bad export: validation stops the run",
+  "params": {
+   "corrupt": 0.03
+  },
+  "run_id": "20261001-150726-2651",
+  "status": "failed",
+  "duration": 0.0969,
+  "counts": {
+   "succeeded": 1,
+   "cached": 1,
+   "failed": 1,
+   "skipped": 10
+  }
+ }
+]
