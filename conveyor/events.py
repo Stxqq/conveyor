@@ -30,7 +30,7 @@ class EventLog:
         with self._lock:
             self._seq += 1
             event = {"seq": self._seq, "ts": round(time.time(), 4), "type": kind}
-            event.update(_finite(fields))
+            event.update(json_safe(fields))
             self._fh.write(json.dumps(event, default=str) + "\n")
             self._fh.flush()
             for listener in self._listeners:
@@ -69,12 +69,12 @@ def follow(
                 return
 
 
-def _finite(value: Any) -> Any:
+def json_safe(value: Any) -> Any:
     # NaN and inf aren't valid JSON and the browser's JSON.parse rejects them.
     if isinstance(value, float) and not math.isfinite(value):
         return None
     if isinstance(value, dict):
-        return {k: _finite(v) for k, v in value.items()}
+        return {k: json_safe(v) for k, v in value.items()}
     if isinstance(value, (list, tuple)):
-        return [_finite(v) for v in value]
+        return [json_safe(v) for v in value]
     return value
