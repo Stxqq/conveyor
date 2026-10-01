@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import mimetypes
+import os
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -111,7 +112,11 @@ def make_server(workspace: str | Path, host: str, port: int) -> ThreadingHTTPSer
 
             def still_running() -> bool:
                 found = lineage.run(run_id)
-                return found is not None and found["status"] == "running"
+                if found is None or found["status"] != "running":
+                    return False
+                # killed with SIGKILL or by the OOM killer, a run never gets to
+                # record that it stopped
+                return _alive(read_events(path)[0].get("pid"))
 
             self.send_response(200)
             self.send_header("Content-Type", "text/event-stream")
@@ -153,6 +158,18 @@ def make_server(workspace: str | Path, host: str, port: int) -> ThreadingHTTPSer
     server = _Server((host, port), Handler)
     server.daemon_threads = True
     return server
+
+
+def _alive(pid: int | None) -> bool:
+    if pid is None:
+        return True
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:  # someone else's process, but it exists
+        return True
+    return True
 
 
 class _Server(ThreadingHTTPServer):

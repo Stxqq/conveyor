@@ -161,6 +161,7 @@ class _Run:
             graph=graph,
             workers=self.ex.max_workers,
             cache=self.ex.cache,
+            pid=os.getpid(),
         )
         status = "failed"
         pool = ThreadPoolExecutor(self.ex.max_workers, thread_name_prefix="conveyor")

@@ -1,4 +1,6 @@
 import json
+import os
+import sqlite3
 import threading
 import urllib.error
 import urllib.request
@@ -158,3 +160,23 @@ def test_follow_gives_up_on_a_run_whose_process_died(tmp_path):
     beats = follow(path, poll=0.01, heartbeat=0.05)
     assert next(beats)["type"] == "run_started"
     assert next(beats) is None
+
+
+def test_stream_ends_when_the_run_process_is_gone(api, ws, monkeypatch):
+    from conveyor.ui import server
+
+    run_id = json.load(api("/api/runs"))[0]["id"]
+    db = sqlite3.connect(Path(ws) / "conveyor.db")
+    db.execute("UPDATE runs SET status = 'running' WHERE id = ?", (run_id,))
+    db.commit()
+    events = Path(ws) / "runs" / f"{run_id}.jsonl"
+    first = json.loads(events.read_text().splitlines()[0])
+    assert first["pid"] == os.getpid()
+    events.write_text(json.dumps({**first, "pid": 2**22 + 12345}) + "\n")
+    real_follow = server.follow
+    monkeypatch.setattr(
+        server, "follow", lambda path, **kw: real_follow(path, heartbeat=0.05, **kw)
+    )
+    frames = api(f"/api/runs/{run_id}/stream").read().decode().split("\n\n")
+    assert frames[0].startswith("id: 1\n")
+    assert ": keepalive" not in frames
