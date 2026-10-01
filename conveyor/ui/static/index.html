@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>conveyor</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23fff'/%3E%3Ccircle cx='8' cy='16' r='3' fill='%23111113'/%3E%3Ccircle cx='24' cy='9' r='3' fill='%23111113'/%3E%3Ccircle cx='24' cy='23' r='3' fill='%23111113'/%3E%3Cpath d='M11 15l10-5M11 17l10 5' stroke='%23111113' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  :root {
+    --ink: #111113; --gray: #9a9aa2; --tile: #f5f5f6; --hairline: #ececef;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #fff; color: var(--ink); line-height: 1.6;
+    font: 16.5px/1.6 "InterVariable", "Inter", -apple-system, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 520px; margin: 0 auto; padding: 160px 20px 120px; }
+  h1 { font-size: 16.5px; font-weight: 600; margin: 0; }
+  .lede { color: var(--gray); margin: 8px 0 48px; }
+  .row {
+    display: grid; grid-template-columns: 1fr auto; gap: 4px 16px;
+    padding: 14px 0; border-top: 1px solid var(--hairline);
+    opacity: 0; transform: translateY(14px);
+    animation: enter .45s cubic-bezier(.32,.72,0,1) forwards;
+  }
+  .id { font-family: var(--mono); font-size: 13px; }
+  .meta { color: var(--gray); font-size: 14px; grid-column: 1 / -1; }
+  .chip {
+    font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 10px;
+    align-self: center;
+  }
+  .succeeded { background: #BBF7D0; color: #14532D; }
+  .failed { background: #FBCFE8; color: #831843; }
+  .running { background: #FDE68A; color: #78350F; }
+  .empty { color: var(--gray); }
+  @keyframes enter { to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .row { animation: none; opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Runs</h1>
+  <p class="lede">Recent pipeline runs in this workspace.</p>
+  <div id="runs"></div>
+</main>
+<script type="module">
+  const list = document.getElementById("runs");
+
+  const seconds = (s) => (s == null ? "" : s < 1 ? `${Math.round(s * 1000)} ms` : `${s.toFixed(2)} s`);
+
+  function render(runs) {
+    if (!runs.length) {
+      list.innerHTML = '<p class="empty">No runs yet.</p>';
+      return;
+    }
+    list.replaceChildren(...runs.map((run, i) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.style.animationDelay = `${i * 50}ms`;
+      row.innerHTML = `
+        <span class="id"></span><span class="chip ${run.status}">${run.status}</span>
+        <span class="meta"></span>`;
+      row.querySelector(".id").textContent = `${run.pipeline} · ${run.id}`;
+      row.querySelector(".meta").textContent =
+        `${run.succeeded ?? 0} ran, ${run.cached ?? 0} cached, ${run.failed ?? 0} failed · ${seconds(run.duration)}`;
+      return row;
+    }));
+  }
+
+  fetch("api/runs").then((r) => r.json()).then(render);
+</script>
+</body>
+</html>
