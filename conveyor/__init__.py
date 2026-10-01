@@ -4,6 +4,7 @@ from .context import current, log, log_metric
 from .dag import Pipeline, PipelineError
 from .executor import Executor, RunResult, StepOutcome, StepTimeout
 from .hashing import digest
+from .loader import load_pipeline
 from .step import Step, step
 
 __all__ = [
@@ -16,6 +17,7 @@ __all__ = [
     "StepTimeout",
     "current",
     "digest",
+    "load_pipeline",
     "log",
     "log_metric",
     "run",
