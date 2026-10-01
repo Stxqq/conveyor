@@ -62,7 +62,13 @@ def _feed(h: Any, value: Any) -> None:
             _feed(h, getattr(value, f.name))
     else:
         h.update(b"pickle:")
-        h.update(pickle.dumps(value, protocol=5))
+        try:
+            h.update(pickle.dumps(value, protocol=5))
+        except (pickle.PicklingError, AttributeError, TypeError) as exc:
+            # same wording as the store, whichever one hits the value first
+            raise pickle.PicklingError(
+                f"can't pickle {type(value).__name__}: {exc}"
+            ) from exc
 
 
 def cache_key(
