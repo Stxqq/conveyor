@@ -2,13 +2,12 @@
 batch scoring of the newest month and drift monitoring.
 
     conveyor run examples/churn/pipeline.py
-    conveyor run examples/churn/pipeline.py -p l2=10
-    conveyor run examples/churn/pipeline.py -p corrupt=0.03   # fails validation
+    conveyor run examples/churn/pipeline.py -p l2=1000           # gate says no
+    conveyor run examples/churn/pipeline.py -p corrupt=0.03      # fails validation
+    conveyor run examples/churn/pipeline.py -p flaky_reads=2     # retries
 """
 
 from __future__ import annotations
-
-import random
 
 import numpy as np
 
@@ -211,12 +210,12 @@ def new_month(
     seed: int = 7,
     n_customers: int = 24_000,
     price_increase: float = 0.12,
-    flaky: float = 0.0,
+    flaky_reads: int = 0,
 ):
-    """The month we need scores for. ``flaky`` makes the warehouse read fail
-    on some attempts, to watch the retry policy work."""
+    """The month we need scores for. ``flaky_reads`` makes the first few
+    warehouse reads time out, to watch the retry policy at work."""
     attempt = current().attempt
-    if random.Random(f"{seed}:{attempt}").random() < flaky:
+    if attempt <= flaky_reads:
         raise ConnectionError(f"warehouse read timed out (attempt {attempt})")
     frame = simulate(
         n_customers // 12, seed + 1, months=range(12, 13), price_increase=price_increase
