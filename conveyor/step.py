@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import ast
-import hashlib
 import inspect
-import textwrap
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import Any
+
+from .fingerprint import code_fingerprint
 
 _EMPTY = inspect.Parameter.empty
 
@@ -25,7 +25,12 @@ class Step:
     timeout: float | None = None
     retry_on: tuple[type[BaseException], ...] = (Exception,)
     version: str = ""
-    fingerprint: str = ""
+
+    @cached_property
+    def fingerprint(self) -> str:
+        # Worked out on first use rather than at decoration time, so helpers
+        # defined further down the module are already there to be followed.
+        return code_fingerprint(self.fn)
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return self.fn(*args, **kwargs)
@@ -47,7 +52,8 @@ def step(
     """Turn a function into a pipeline step.
 
     Use bare (``@step``) or with options (``@step(retries=3, timeout=30)``).
-    Bump ``version`` to invalidate the cache when a helper the step calls changes.
+    The cache follows the step's code into your own modules; bump ``version``
+    when something it can't see changes, like a file the step reads.
     """
 
     def wrap(f: Callable[..., Any]) -> Step:
@@ -71,23 +77,6 @@ def step(
             timeout=timeout,
             retry_on=retry_on,
             version=version,
-            fingerprint=source_fingerprint(f),
         )
 
     return wrap(fn) if fn is not None else wrap
-
-
-def source_fingerprint(fn: Callable[..., Any]) -> str:
-    """Hash of the function's code with decorators, comments and formatting
-    stripped, so reformatting a step or changing its retry policy keeps the cache."""
-    try:
-        tree = ast.parse(textwrap.dedent(inspect.getsource(fn)))
-        node = tree.body[0]
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            node.decorator_list = []
-        text = ast.unparse(node)
-    except (OSError, TypeError, SyntaxError, IndexError):
-        # defined in a REPL or exec'd: no source on disk, fall back to bytecode
-        code = fn.__code__
-        text = repr((code.co_code, code.co_consts, code.co_names, code.co_varnames))
-    return hashlib.sha256(text.encode()).hexdigest()

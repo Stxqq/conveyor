@@ -1,4 +1,6 @@
+import importlib
 import importlib.util
+import sys
 import textwrap
 
 import numpy as np
@@ -146,3 +148,67 @@ def test_no_cache_and_missing_files_recompute(executor, tmp_path):
         "total": "succeeded",
         "parity": "cached",
     }
+
+
+HELPERS = """
+def _factor():
+    return {factor}
+
+
+def scale(x):
+    return x * _factor()
+
+
+def offset(x):
+    return x + {offset}
+"""
+
+STEPS = """
+from conveyor import step
+from helpers import scale
+
+
+@step
+def scaled(x=3):
+    return scale(x)
+"""
+
+
+def test_editing_a_helper_it_calls_invalidates_the_step(tmp_path, monkeypatch):
+    monkeypatch.syspath_prepend(str(tmp_path))
+    # same-second rewrites must not be served from a stale .pyc
+    monkeypatch.setattr(sys, "dont_write_bytecode", True)
+    ex = Executor(tmp_path / "ws")
+
+    def load(factor, offset):
+        (tmp_path / "helpers.py").write_text(
+            HELPERS.format(factor=factor, offset=offset)
+        )
+        (tmp_path / "steps.py").write_text(STEPS)
+        for name in ("helpers", "steps"):
+            sys.modules.pop(name, None)
+        importlib.invalidate_caches()
+        return ex.run(Pipeline("p", [importlib.import_module("steps").scaled]))
+
+    assert load(2, 1).output("scaled") == 6
+    # offset isn't reachable from scaled
+    assert load(2, 100).steps["scaled"].status == "cached"
+    # _factor is two calls down
+    changed = load(20, 100)
+    assert changed.steps["scaled"].status == "succeeded"
+    assert changed.output("scaled") == 60
+
+
+def test_values_captured_by_a_step_factory_are_part_of_the_key(executor):
+    def scaled_by(factor):
+        @step(name="scaled")
+        def scaled(x=3):
+            return x * factor
+
+        return scaled
+
+    assert executor.run(Pipeline("p", [scaled_by(2)])).output("scaled") == 6
+    other = executor.run(Pipeline("p", [scaled_by(5)]))
+    assert other.steps["scaled"].status == "succeeded"
+    assert other.output("scaled") == 15
+
