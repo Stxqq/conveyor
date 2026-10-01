@@ -2,7 +2,7 @@
 
 A small pipeline engine for ML in plain Python: steps wired by parameter name, a content-addressed cache, retries, lineage in SQLite and a live run view, with numpy as the only dependency.
 
-<p align="center"><img src=".github/assets/hero.gif" width="880" alt="The churn pipeline replaying in the run viewer"></p>
+<p align="center"><img src=".github/assets/hero.gif" width="880" alt="A cold run of the churn pipeline in the run viewer, then a rerun with l2=1000 where only train and the steps after it run"></p>
 
 <p align="center">
   <a href="https://github.com/Stxqq/conveyor/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Stxqq/conveyor/actions/workflows/ci.yml/badge.svg"></a>
@@ -43,21 +43,10 @@ pipeline = Pipeline("churn", [customers, validate, features, train])
 
 ## How it works
 
-```
- @step functions ──▶ Pipeline ──▶ Executor ──────────────────────────────▶ RunResult
-   names are edges    validates     thread pool, runs every ready step
-                      the DAG       │
-                                    ├─ cache key = sha256(step code + project code it calls,
-                                    │                     params it reads, input hashes)
-                                    ├─ hit?  reuse the artifact, copy its metrics, no code runs
-                                    ├─ miss? run with retries + timeout, store the output
-                                    │
-                .conveyor/          ▼
-                ├─ artifacts/ab/abcd….npz|json|pkl   content-addressed outputs
-                ├─ conveyor.db                       runs, step_runs, artifacts, metrics
-                ├─ runs/<run-id>.jsonl               event stream, tailed by the UI
-                └─ registry/churn/v1/                model.pkl + card.json
-```
+<p align="center"><img src=".github/assets/how-it-works.png" width="880" alt="How a step's cache key is built from its inputs, parameters and code, and what happens on a hit or a miss"></p>
+
+The hashes in the picture are real ones, from the `train` step of the first
+recorded run in `docs/runs/cold.json`.
 
 A step's parameter names are its inputs. A name that matches another step is
 an edge, anything else is a pipeline parameter with a default. `Pipeline(...)`
@@ -136,7 +125,11 @@ python3 -m venv .venv && . .venv/bin/activate
 pip install -e '.[dev]'
 
 conveyor run examples/churn/pipeline.py
+conveyor run examples/churn/pipeline.py -p l2=1000
+conveyor ui    # http://localhost:5300
 ```
+
+Python 3.10 or newer; numpy is the only runtime dependency.
 
 Or `make demo`, `make test`, `make ui`. With Docker:
 
@@ -207,7 +200,10 @@ $ conveyor run examples/churn/pipeline.py -p l2=1000
 succeeded in 59 ms  5 ran, 8 cached, 0 failed, 0 skipped
 ```
 
-Feed it a bad export and it stops before training anything:
+Feed it a bad export and it stops before training anything. Every check that
+failed gets its own line, in the terminal and in the run viewer:
+
+<p align="center"><img src=".github/assets/failed.png" width="420" alt="The failed validate step in the run viewer, listing three failed checks"></p>
 
 ```
 $ conveyor run examples/churn/pipeline.py -p corrupt=0.03
@@ -330,7 +326,7 @@ one run to the next.
 | churn pipeline, rerun: 11 cache hits, gate and register run (median of 5) | 8.9 ms |
 | engine overhead per step (200-step chain of tiny steps, cache on) | 0.45–1.2 ms |
 | 64 independent 50 ms steps, 1 worker vs 8 workers | 3.73 s vs 0.49 s (7.6x) |
-| test suite | 70 Python tests in 7.0 s, 7 frontend tests in 0.1 s |
+| test suite | 70 Python tests in 7.3 s, 7 frontend tests in 0.1 s |
 
 Churn model on the two held-out months (4,058 rows, 16.5% churn):
 
