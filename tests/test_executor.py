@@ -115,6 +115,21 @@ def test_only_listed_exceptions_are_retried(executor):
     assert len(attempts) == 1
 
 
+def test_an_output_that_cannot_be_stored_fails_the_step(executor):
+    @step
+    def unpicklable():
+        return lambda x: x
+
+    @step
+    def after(unpicklable):
+        return 1
+
+    result = executor.run(Pipeline("p", [unpicklable, after]))
+    assert result.steps["unpicklable"].status == "failed"
+    assert "pickle" in result.steps["unpicklable"].error.lower()
+    assert result.steps["after"].status == "skipped"
+
+
 def test_backoff_grows_with_jitter():
     from conveyor.executor import backoff_delay
 

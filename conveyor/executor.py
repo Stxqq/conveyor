@@ -278,45 +278,44 @@ class _Run:
 
     def _attempt(self, name: str, inputs: dict[str, str]) -> _Attempted:
         step = self.pipeline.steps[name]
-        kwargs = {u: self._value_of(u) for u in inputs}
-        kwargs.update(self._params_for(name))
         out = _Attempted(started_at=time.time())
         t0 = time.perf_counter()
         ctx = StepContext(self.id, name, 0, self.ex.workspace, self.events)
+        try:
+            kwargs = {u: self._value_of(u) for u in inputs}
+            kwargs.update(self._params_for(name))
+            out.value = self._call_with_retries(step, kwargs, ctx, out)
+            out.artifact = self.ex.store.put(out.value)
+        except Exception as exc:
+            out.error = "".join(traceback.format_exception_only(type(exc), exc)).strip()
+            self.events.emit(
+                "step_traceback", step=name, traceback=_trim_traceback(exc)
+            )
+        out.duration = time.perf_counter() - t0
+        out.metrics = ctx.metrics
+        return out
+
+    def _call_with_retries(
+        self, step: Step, kwargs: dict[str, Any], ctx: StepContext, out: _Attempted
+    ) -> Any:
         while True:
             out.attempts += 1
             ctx.attempt = out.attempts
-            self.events.emit("step_started", step=name, attempt=out.attempts)
+            self.events.emit("step_started", step=step.name, attempt=out.attempts)
             try:
-                out.value = _call(step, kwargs, ctx)
-                break
+                return _call(step, kwargs, ctx)
             except Exception as exc:
-                retryable = isinstance(exc, step.retry_on)
-                if not retryable or out.attempts > step.retries:
-                    out.error = "".join(
-                        traceback.format_exception_only(type(exc), exc)
-                    ).strip()
-                    out.duration = time.perf_counter() - t0
-                    out.metrics = ctx.metrics
-                    self.events.emit(
-                        "step_traceback",
-                        step=name,
-                        traceback=_trim_traceback(exc),
-                    )
-                    return out
+                if not isinstance(exc, step.retry_on) or out.attempts > step.retries:
+                    raise
                 delay = backoff_delay(step.backoff, out.attempts)
                 self.events.emit(
                     "step_retry",
-                    step=name,
+                    step=step.name,
                     attempt=out.attempts,
                     error=f"{type(exc).__name__}: {exc}",
                     delay=round(delay, 3),
                 )
                 time.sleep(delay)
-        out.artifact = self.ex.store.put(out.value)
-        out.duration = time.perf_counter() - t0
-        out.metrics = ctx.metrics
-        return out
 
     def _settle(
         self, name: str, key: str, inputs: dict[str, str], res: _Attempted
