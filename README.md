@@ -274,7 +274,7 @@ conveyor/
   ui/            API server and the frontend
 examples/churn/  data, features, Newton logistic regression, metrics, PSI, pipeline
 scripts/         record_demo.py (docs/runs/*.json), assert_cached.py (CI)
-tests/           59 tests, about 3.5 s
+tests/           60 tests, about 3.4 s
 ```
 
 ## Results
@@ -287,7 +287,7 @@ Measured on an Apple M4 Pro (14 cores), Python 3.11, numpy 2.4:
 | churn pipeline, fully cached rerun (median of 5) | 2.7 ms |
 | engine overhead per step (200-step chain of no-op steps) | 0.47 ms |
 | 64 independent 50 ms steps, 1 worker vs 8 workers | 3.48 s vs 0.44 s (7.9x) |
-| test suite | 59 tests in 3.6 s |
+| test suite | 60 tests in 3.4 s |
 
 Churn model on the two held-out months (4,058 rows, 16.5% churn):
 
