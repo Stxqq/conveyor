@@ -1,3 +1,7 @@
+import os
+import subprocess
+import sys
+
 import numpy as np
 
 from conveyor import digest
@@ -36,3 +40,19 @@ def test_digest_distinguishes_types_and_dtypes():
     assert digest(np.zeros(3, np.float32)) != digest(np.zeros(3, np.float64))
     assert digest({"a": 1, "b": 2}) == digest({"b": 2, "a": 1})
     assert digest([1, 2]) != digest((1, 2))
+
+
+def test_set_digest_does_not_depend_on_the_hash_seed():
+    script = "from conveyor import digest; print(digest({'ab', 'cd', 'ef', 'gh'}))"
+    seen = {
+        subprocess.run(
+            [sys.executable, "-c", script],
+            env={**os.environ, "PYTHONHASHSEED": seed},
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout
+        for seed in ("1", "2", "3")
+    }
+    assert len(seen) == 1
+    assert digest({1, 2}) == digest(frozenset({2, 1})) != digest([1, 2])

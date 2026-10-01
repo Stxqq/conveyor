@@ -37,6 +37,7 @@ def _feed(h: Any, value: Any) -> None:
         h.update(f"np:{value.dtype.str}:{value.item()!r};".encode())
     elif isinstance(value, dict):
         h.update(b"{")
+        # repr so dicts with mixed key types still sort
         for key in sorted(value, key=repr):
             _feed(h, key)
             _feed(h, value[key])
@@ -46,6 +47,13 @@ def _feed(h: Any, value: Any) -> None:
         for item in value:
             _feed(h, item)
         h.update(b"]")
+    elif isinstance(value, (set, frozenset)):
+        # pickling a set follows iteration order, which changes with the
+        # per-process string hash seed; sort the member digests instead
+        h.update(b"set{")
+        for member in sorted(digest(v) for v in value):
+            h.update(member.encode())
+        h.update(b"}")
     elif dataclasses.is_dataclass(value) and not isinstance(value, type):
         cls = type(value)
         h.update(f"dc:{cls.__module__}.{cls.__qualname__}".encode())
