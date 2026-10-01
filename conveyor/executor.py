@@ -180,6 +180,7 @@ class _Run:
             status = "cancelled"
             raise
         finally:
+            # On Ctrl-C don't wait for steps we couldn't interrupt anyway.
             pool.shutdown(wait=status != "cancelled", cancel_futures=True)
             finished = time.time()
             self.ex.lineage.finish_run(self.id, status, finished)

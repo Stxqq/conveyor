@@ -413,7 +413,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"conveyor: {exc}", file=sys.stderr)
         return 2
     except KeyboardInterrupt:
-        return 130
+        # A step still running on a worker thread can't be interrupted, and the
+        # interpreter would wait for it on exit. Leave it behind instead, the
+        # same way a timed-out attempt is.
+        sys.stdout.flush()
+        os._exit(130)
 
 
 if __name__ == "__main__":
