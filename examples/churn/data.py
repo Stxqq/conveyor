@@ -68,8 +68,8 @@ def simulate(
 
     contract = rng.choice(CONTRACTS, size=n, p=[0.55, 0.28, 0.17])
     plan = rng.choice(PLANS, size=n, p=[0.45, 0.38, 0.17])
-    # Invoice payers skew older; that correlation is what makes age informative
-    # only partly on its own.
+    # Invoice payers skew older, so age carries some of the payment signal and is
+    # weaker on its own than it looks.
     age = np.clip(rng.normal(44, 13, size=n), 18, 92).round()
     invoice_p = np.clip(0.12 + (age - 44) * 0.004, 0.03, 0.4)
     payment = np.where(
@@ -108,7 +108,7 @@ def simulate(
     )
     churned = (rng.random(n) < 1 / (1 + np.exp(-logit))).astype(np.int64)
 
-    # Billing glitches: a handful of charges recorded in cents instead of euros.
+    # Billing glitches: a handful of charges keyed in with an extra zero.
     glitch = rng.random(n) < 0.004
     monthly = np.where(glitch, monthly * 10, monthly)
     age = np.where(rng.random(n) < 0.04, np.nan, age)

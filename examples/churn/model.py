@@ -28,6 +28,8 @@ def fit_logistic(
     n, d = X.shape
     A = np.column_stack([np.ones(n), X])
     w = np.zeros(d + 1)
+    # start the intercept at the base rate's log-odds; Newton then needs a step
+    # or two less
     w[0] = np.log(y.mean() / (1 - y.mean()))
     penalty = np.full(d + 1, l2)
     penalty[0] = 0.0
@@ -85,6 +87,7 @@ def records_to_frame(rows: list[dict]) -> dict[str, np.ndarray]:
 
 
 def _sigmoid(z: np.ndarray) -> np.ndarray:
+    # the tanh form doesn't overflow for large |z| the way 1 / (1 + exp(-z)) does
     return 0.5 * (1 + np.tanh(0.5 * z))
 
 
