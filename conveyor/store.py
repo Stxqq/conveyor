@@ -26,11 +26,36 @@ def _plain_array(value: Any) -> bool:
 
 
 def _is_table(value: Any) -> bool:
+    """A dict of arrays, or of such dicts (``{"train": {...}, "test": {...}}``)."""
     return (
         isinstance(value, dict)
         and bool(value)
-        and all(isinstance(k, str) and _plain_array(v) for k, v in value.items())
+        and all(
+            isinstance(k, str) and "/" not in k and (_plain_array(v) or _is_table(v))
+            for k, v in value.items()
+        )
     )
+
+
+def _flatten(table: dict[str, Any], prefix: str = "") -> dict[str, np.ndarray]:
+    flat: dict[str, np.ndarray] = {}
+    for key, value in table.items():
+        if isinstance(value, dict):
+            flat.update(_flatten(value, f"{prefix}{key}/"))
+        else:
+            flat[prefix + key] = value
+    return flat
+
+
+def _unflatten(flat: dict[str, np.ndarray]) -> dict[str, Any]:
+    table: dict[str, Any] = {}
+    for key, value in flat.items():
+        *parents, leaf = key.split("/")
+        node = table
+        for p in parents:
+            node = node.setdefault(p, {})
+        node[leaf] = value
+    return table
 
 
 def _is_json(value: Any) -> bool:
@@ -61,7 +86,7 @@ _EXT = {"array": ".npz", "table": ".npz", "json": ".json", "pickle": ".pkl"}
 class ArtifactStore:
     """Content-addressed files under ``<root>/artifacts/ab/abcdef….<ext>``.
 
-    Arrays and dicts of arrays go to npz, JSON-safe values to json, anything
+    Arrays and (nested) dicts of arrays go to npz, JSON-safe values to json, anything
     else is pickled.
     """
 
@@ -100,14 +125,14 @@ class ArtifactStore:
         with np.load(path, allow_pickle=False) as npz:
             if kind == "array":
                 return npz["array"]
-            return {key: npz[key] for key in npz.files}
+            return _unflatten({key: npz[key] for key in npz.files})
 
 
 def _dump(value: Any, kind: str, fh: Any) -> None:
     if kind == "array":
         np.savez_compressed(fh, array=value)
     elif kind == "table":
-        np.savez_compressed(fh, **value)
+        np.savez_compressed(fh, **_flatten(value))
     elif kind == "json":
         fh.write(json.dumps(value, indent=1).encode())
     else:
